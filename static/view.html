@@ -10,46 +10,13 @@
 		<title>SFM++</title>
 	</head>
 	<body>
-		<label for="station-select">Estació:</label>
-		<select id="station-select">
-			<option value="1">Intermodal</option>
-			<option value="2">Jacint Verdaguer</option>
-			<option value="3">Son Costa</option>
-			<option value="54">Son Fuster Vell</option>
-			<option value="55">Son Castelló</option>
-			<option value="56">Gran Via Asima</option>
-			<option value="57">Camí dels Reis</option>
-			<option value="58">Son Sardina</option>
-			<option value="51">UIB</option>
-			<option value="4">Son Fuster</option>
-			<option value="30">Son Cladera</option>
-			<option value="6">Verge de Lluc</option>
-			<option value="7">Pont d'Inca</option>
-			<option value="8">Pont d'Inca Nou</option>
-			<option value="9">Polígon de Marratxí</option>
-			<option value="10">Marratxí</option>
-			<option value="11">Es Caülls</option>
-			<option value="12">Santa Maria</option>
-			<option value="13">Consell - Alaró</option>
-			<option value="14">Binissalem</option>
-			<option value="15">Lloseta</option>
-			<option value="16">Inca</option>
-			<option value="17">Enllaç</option>
-			<option value="18">Llubí</option>
-			<option value="19">Muro</option>
-			<option value="20">SaPobla</option>
-			<option value="21">Sineu</option>
-			<option value="23">Petra</option>
-			<option value="24">Manacor</option>
-		</select>
-
-		<div id="app"></div>
-
 		<script type="module">
 			import { h, Component, render } from 'https://esm.sh/preact';
+			import { useState, useEffect } from 'https://esm.sh/preact/hooks';
 			import htm from 'https://esm.sh/htm';
+			import stations from './stations.js';
 
-			const data = {"station": "Intermodal", "table": [{"title": "Manacor", "time": "09:30", "track": 7}, {"title": "UIB", "time": "09:35", "track": 2}, {"title": "Sa Pobla", "time": "09:50", "track": 8}, {"title": "UIB", "time": "09:55", "track": 2}, {"title": "Manacor", "time": "10:10", "track": 7}, {"title": "UIB", "time": "10:15", "track": 2}, {"title": "Sa Pobla", "time": "10:30", "track": 8}]};
+			const static_data = {"station": "Intermodal", "table": [{"title": "Manacor", "time": "09:30", "track": 7}, {"title": "UIB", "time": "09:35", "track": 2}, {"title": "Sa Pobla", "time": "09:50", "track": 8}, {"title": "UIB", "time": "09:55", "track": 2}, {"title": "Manacor", "time": "10:10", "track": 7}, {"title": "UIB", "time": "10:15", "track": 2}, {"title": "Sa Pobla", "time": "10:30", "track": 8}]};
 
 			const get_date = () => {
 				const now = new Date();
@@ -57,17 +24,17 @@
 				return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(now);
 			};
 
-			const query_data = code => {
-			};
-
-			const selector = document.querySelector('#station-select');
-			selector.addEventListener('change', () => {
-				query_data(+selector.value);
-			});
-
 			const html = htm.bind(h);
 
-			function Table({data}) {
+			function Table({station}) {
+				const [data, setData] = useState([]);
+
+				useEffect(async () => {
+					const res = await fetch(`http://127.0.0.1:8420/${station}`);
+					const {table} = await res.json();
+					setData(table);
+				}, [station]);
+
 				const rows = data.map(({title, time, track}) => html`
 					<tr>
 						<td>${title}</td>
@@ -79,17 +46,30 @@
 				return html`
 					<table>
 						<caption class="clock">${get_date()}</caption>
-						${rows}
+						${data.length ? rows : html`<tr><td>(sense dades)</td></tr>`}
 					</table>`;
 			}
 
-			function App({data}) {
+			function StationSelector({setter}) {
+				const set = event => setter(event.target.value);
+
+				const rows = Object.entries(stations).map(([k, v]) => html`<option value="${v}">${k}</option>`);
 				return html`
-					<h1>${data.station}</h1>
-					<${Table} data=${data.table} />`;
+					<label for="station-select">Estació</label>
+					<select id="station-select" onchange=${set}>${rows}</select>`;
 			}
 
-			render(html`<${App} data=${data} />`, document.querySelector('#app'));
+			function App() {
+				const [stationCode, setStationCode] = useState(1); // TODO: cache last selection
+				const rev_lookup = val => Object.entries(stations).find(([k, v]) => v == val);
+
+				return html`
+					<${StationSelector} setter=${setStationCode} />
+					<h1>${rev_lookup(stationCode)[0]}</h1>
+					<${Table} station=${stationCode} />`;
+			}
+
+			render(html`<${App} />`, document.body);
 		</script>
 	</body>
 </html>
