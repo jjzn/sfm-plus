@@ -43,14 +43,13 @@
 			<option value="24">Manacor</option>
 		</select>
 
-		<script>
-			const data = {"station": "Intermodal", "table": [{"title": "Manacor", "time": "09:30", "track": 7}, {"title": "UIB", "time": "09:35", "track": 2}, {"title": "Sa Pobla", "time": "09:50", "track": 8}, {"title": "UIB", "time": "09:55", "track": 2}, {"title": "Manacor", "time": "10:10", "track": 7}, {"title": "UIB", "time": "10:15", "track": 2}, {"title": "Sa Pobla", "time": "10:30", "track": 8}]};
+		<div id="app"></div>
 
-			const elem = (type, content) => {
-				const res = document.createElement(type);
-				res.textContent = content;
-				return res;
-			};
+		<script type="module">
+			import { h, Component, render } from 'https://esm.sh/preact';
+			import htm from 'https://esm.sh/htm';
+
+			const data = {"station": "Intermodal", "table": [{"title": "Manacor", "time": "09:30", "track": 7}, {"title": "UIB", "time": "09:35", "track": 2}, {"title": "Sa Pobla", "time": "09:50", "track": 8}, {"title": "UIB", "time": "09:55", "track": 2}, {"title": "Manacor", "time": "10:10", "track": 7}, {"title": "UIB", "time": "10:15", "track": 2}, {"title": "Sa Pobla", "time": "10:30", "track": 8}]};
 
 			const get_date = () => {
 				const now = new Date();
@@ -66,25 +65,31 @@
 				query_data(+selector.value);
 			});
 
-			const station = elem('h1', data.station);
-			const table = elem('table');
+			const html = htm.bind(h);
 
-			const clock = elem('caption', get_date());
-			clock.classList.add('clock');
-			table.append(clock);
+			function Table({data}) {
+				const rows = data.map(({title, time, track}) => html`
+					<tr>
+						<td>${title}</td>
+						<td>${time}</td>
+						<td>${track}</td>
+					</tr>`);
 
-			setInterval(() => clock.textContent = get_date(), 60 * 1000);
-
-			for (const {title, time, track} of data.table) {
-				const row = elem('tr');
-				row.append(
-					elem('td', title),
-					elem('td', time),
-					elem('td', `via ${track}`));
-				table.append(row);
+				// TODO: update clock
+				return html`
+					<table>
+						<caption class="clock">${get_date()}</caption>
+						${rows}
+					</table>`;
 			}
 
-			document.body.append(station, table);
+			function App({data}) {
+				return html`
+					<h1>${data.station}</h1>
+					<${Table} data=${data.table} />`;
+			}
+
+			render(html`<${App} data=${data} />`, document.querySelector('#app'));
 		</script>
 	</body>
 </html>
