@@ -51,16 +51,21 @@
 			}
 
 			function StationSelector({setter}) {
-				const set = event => setter(event.target.value);
+				const set = event => {
+					const val = event.target.value;
+					localStorage.setItem('selected-station-code', val);
+					setter(val);
+				};
 
-				const rows = Object.entries(stations).map(([k, v]) => html`<option value="${v}">${k}</option>`);
+				const initial = localStorage.getItem('selected-station-code') || 1;
+				const rows = Object.entries(stations).map(([k, v]) => html`<option value="${v}" selected=${v == initial}>${k}</option>`);
 				return html`
 					<label for="station-select">Estació</label>
 					<select id="station-select" onchange=${set}>${rows}</select>`;
 			}
 
 			function App() {
-				const [stationCode, setStationCode] = useState(1); // TODO: cache last selection
+				const [stationCode, setStationCode] = useState(localStorage.getItem('selected-station-code') || 1);
 				const rev_lookup = val => Object.entries(stations).find(([k, v]) => v == val);
 
 				return html`
