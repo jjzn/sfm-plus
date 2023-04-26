@@ -47,4 +47,7 @@ select {
 	background: white;
 }
 
-label { font-weight: bold; }
+label {
+	font-weight: bold;
+	margin-right: .5em;
+}

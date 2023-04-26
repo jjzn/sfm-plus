@@ -62,7 +62,6 @@ def retrieve_info(code):
         track = track.decode().strip()
         track = int(re.search('\d+', track).group(0))
 
-        print(name)
         dir = re.search('inca|manacor|sapobla|palma|marratxí|uib', name)
         if dir:
             title = station_map.get(dir.group(0), dir.group(0).title())
