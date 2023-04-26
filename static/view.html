@@ -1,0 +1,90 @@
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<link rel="stylesheet" href="style.css"/>
+		<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+
+		<title>SFM++</title>
+	</head>
+	<body>
+		<label for="station-select">Estació:</label>
+		<select id="station-select">
+			<option value="1">Intermodal</option>
+			<option value="2">Jacint Verdaguer</option>
+			<option value="3">Son Costa</option>
+			<option value="54">Son Fuster Vell</option>
+			<option value="55">Son Castelló</option>
+			<option value="56">Gran Via Asima</option>
+			<option value="57">Camí dels Reis</option>
+			<option value="58">Son Sardina</option>
+			<option value="51">UIB</option>
+			<option value="4">Son Fuster</option>
+			<option value="30">Son Cladera</option>
+			<option value="6">Verge de Lluc</option>
+			<option value="7">Pont d'Inca</option>
+			<option value="8">Pont d'Inca Nou</option>
+			<option value="9">Polígon de Marratxí</option>
+			<option value="10">Marratxí</option>
+			<option value="11">Es Caülls</option>
+			<option value="12">Santa Maria</option>
+			<option value="13">Consell - Alaró</option>
+			<option value="14">Binissalem</option>
+			<option value="15">Lloseta</option>
+			<option value="16">Inca</option>
+			<option value="17">Enllaç</option>
+			<option value="18">Llubí</option>
+			<option value="19">Muro</option>
+			<option value="20">SaPobla</option>
+			<option value="21">Sineu</option>
+			<option value="23">Petra</option>
+			<option value="24">Manacor</option>
+		</select>
+
+		<script>
+			const data = {"station": "Intermodal", "table": [{"title": "Manacor", "time": "09:30", "track": 7}, {"title": "UIB", "time": "09:35", "track": 2}, {"title": "Sa Pobla", "time": "09:50", "track": 8}, {"title": "UIB", "time": "09:55", "track": 2}, {"title": "Manacor", "time": "10:10", "track": 7}, {"title": "UIB", "time": "10:15", "track": 2}, {"title": "Sa Pobla", "time": "10:30", "track": 8}]};
+
+			const elem = (type, content) => {
+				const res = document.createElement(type);
+				res.textContent = content;
+				return res;
+			};
+
+			const get_date = () => {
+				const now = new Date();
+
+				return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(now);
+			};
+
+			const query_data = code => {
+			};
+
+			const selector = document.querySelector('#station-select');
+			selector.addEventListener('change', () => {
+				query_data(+selector.value);
+			});
+
+			const station = elem('h1', data.station);
+			const table = elem('table');
+
+			const clock = elem('caption', get_date());
+			clock.classList.add('clock');
+			table.append(clock);
+
+			setInterval(() => clock.textContent = get_date(), 60 * 1000);
+
+			for (const {title, time, track} of data.table) {
+				const row = elem('tr');
+				row.append(
+					elem('td', title),
+					elem('td', time),
+					elem('td', `via ${track}`));
+				table.append(row);
+			}
+
+			document.body.append(station, table);
+		</script>
+	</body>
+</html>

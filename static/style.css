@@ -1,0 +1,50 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+}
+
+body > * + * { margin-top: .5em; }
+
+body {
+	padding: clamp(.5em, 5vmax, 3em);
+	font: 100% Inter, sans-serif;
+	font-feature-settings: 'tnum';
+
+	color: black;
+	background: white;
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		color: white;
+		background: black;
+	}
+
+	select { background: black !important; }
+}
+
+table { border-collapse: collapse; }
+tr { border: 1px solid currentcolor; }
+td { padding: .5em; }
+td + td { padding-left: 2em; }
+
+.clock {
+	border: 1px solid currentcolor;
+	border-bottom: none;
+
+	padding: .5rem;
+	font-style: italic;
+	text-align: center;
+}
+
+select {
+	-padding: .5em;
+	border: none;
+	border-bottom: 1px solid currentcolor;
+	font: inherit;
+
+	color: currentcolor;
+	background: white;
+}
+
+label { font-weight: bold; }
