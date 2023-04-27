@@ -6,8 +6,7 @@ h = 79
 
 regions = {
     'name': 342,
-    'time': 210,
-    'track': [152, 65]
+    'rest': 210 + 152 + 65 # includes from time to track
 }
 
 def box(n, x, w):

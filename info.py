@@ -59,11 +59,10 @@ def retrieve_info(code):
         name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '6', 'out/name.png', '-'], capture_output=True).stdout
         name = name.decode().strip().lower().replace(' ', '')
 
-        time = subprocess.run(['tesseract', '--dpi', '300', 'out/time.png', '-'], capture_output=True).stdout
-        time = time.decode().strip()
+        rest = subprocess.run(['tesseract', '--dpi', '300', 'out/rest.png', '-'], capture_output=True).stdout
+        rest = rest.decode().strip()
 
-        track = subprocess.run(['tesseract', '--dpi', '300', '--psm', '10', 'out/track.png', '-'], capture_output=True).stdout
-        track = track.decode().strip()
+        time, track, *_ = rest.split(' ')
         track = int(re.search('\d+', track).group(0))
 
         dir = re.search('inca|manacor|sapobla|palma|marratxí|uib', name)
