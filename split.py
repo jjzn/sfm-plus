@@ -36,11 +36,11 @@ def split(n, im_raw):
 
         reg = ImageOps.expand(reg, border=12, fill=0xffffff).convert('1', dither=Image.Dither.NONE)
 
-        reg.save(f'{name}.png')
+        reg.save(f'out/{name}.png')
 
         x += width
 
     return True
 
 if __name__ == '__main__':
-    split(int(sys.argv[1]), 'sfm.jpg')
+    split(int(sys.argv[1]), sys.argv[2])
