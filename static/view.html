@@ -28,11 +28,21 @@
 
 			function Table({station}) {
 				const [data, setData] = useState([]);
+				const [status, setStatus] = useState('ok');
 
 				useEffect(async () => {
+					setStatus('carregant...');
+
 					const res = await fetch(`http://127.0.0.1:8420/${station}`);
+					if (!res.ok) {
+						setStatus('(sense dades)');
+						return;
+					}
+
 					const {table} = await res.json();
+
 					setData(table);
+					setStatus(table.length ? 'ok' : '(cap tren)');
 				}, [station]);
 
 				const rows = data.map(({title, time, track}) => html`
@@ -46,7 +56,7 @@
 				return html`
 					<table>
 						<caption class="clock">${get_date()}</caption>
-						${data.length ? rows : html`<tr><td>(sense dades)</td></tr>`}
+						${status == 'ok' ? rows : html`<tr><td>${status}</td></tr>`}
 					</table>`;
 			}
 

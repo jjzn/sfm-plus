@@ -25,7 +25,7 @@ class TrainServer(BaseHTTPRequestHandler):
             res = json.dumps(info.retrieve_info(code))
             self.cache[code] = (t, res)
 
-        self.send_response(200)
+        self.send_response(502 if res == 'false' else 200)
         self.send_header('Content-Type', 'text/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()

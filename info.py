@@ -44,7 +44,11 @@ station_map = {
 }
 
 def retrieve_info(code):
-    im = io.BytesIO(requests.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={code}').content)
+    res = requests.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={code}')
+    if not res:
+        return False
+
+    im = io.BytesIO(res.content)
 
     vals = []
 
