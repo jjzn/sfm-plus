@@ -28,6 +28,8 @@ tr { border: 1px solid currentcolor; }
 td { padding: .5em; }
 td + td { padding-left: 2em; }
 
+table caption { min-width: max-content; }
+
 .clock {
 	border: 1px solid currentcolor;
 	border-bottom: none;
@@ -38,7 +40,6 @@ td + td { padding-left: 2em; }
 }
 
 select {
-	-padding: .5em;
 	border: none;
 	border-bottom: 1px solid currentcolor;
 	font: inherit;
