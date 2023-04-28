@@ -43,8 +43,10 @@ station_map = {
     'sapobla': 'Sa Pobla'
 }
 
+_session = requests.Session()
+
 def retrieve_info(code):
-    res = requests.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={code}')
+    res = _session.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={code}')
     if not res:
         return False
 
@@ -59,11 +61,12 @@ def retrieve_info(code):
         name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '6', 'out/name.png', '-'], capture_output=True).stdout
         name = name.decode().strip().lower().replace(' ', '')
 
-        rest = subprocess.run(['tesseract', '--dpi', '300', 'out/rest.png', '-'], capture_output=True).stdout
+        rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '6', 'out/rest.png', '-'], capture_output=True).stdout
         rest = rest.decode().strip()
 
-        time, track, *_ = rest.split(' ')
-        track = int(re.search('\d+', track).group(0))
+        rest_match = re.search('(\d\d?:\d\d) ?[^ \d]* ?(\d+)$', rest)
+        time = rest_match.group(1)
+        track = int(rest_match.group(2))
 
         dir = re.search('inca|manacor|sapobla|palma|marratxí|uib', name)
         if dir:
