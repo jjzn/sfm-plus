@@ -14,7 +14,9 @@ class TrainServer(BaseHTTPRequestHandler):
         code = int(code_str)
 
         # ensure code is valid
-        assert list(info.codes.values()).count(code) == 1
+        if list(info.codes.values()).count(code) != 1:
+            self.send_error(400)
+            return
 
         now = datetime.now()
         t = now.hour * 60 + now.minute
@@ -22,10 +24,13 @@ class TrainServer(BaseHTTPRequestHandler):
         if code in self.cache and self.cache[code][0] >= t:
             res = self.cache[code][1]
         else:
-            res = json.dumps(info.retrieve_info(code))
-            self.cache[code] = (t, res)
+            try:
+                res = json.dumps(info.retrieve_info(code))
+                self.cache[code] = (t, res)
+            except:
+                self.send_error(502)
 
-        self.send_response(502 if res == 'false' else 200)
+        self.send_response(200)
         self.send_header('Content-Type', 'text/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()

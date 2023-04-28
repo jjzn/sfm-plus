@@ -46,7 +46,7 @@ station_map = {
 def retrieve_info(code):
     res = requests.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={code}')
     if not res:
-        return False
+        raise Exception(f'SFM image request returned {res.status_code}')
 
     im = io.BytesIO(res.content)
 
