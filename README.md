@@ -2,6 +2,8 @@
 
 SFM++ is an online timetable which (tries to) mimic the "official" timetable shown at stations of SFM.
 
+![SFM++ screenshot, showing the timetable of Intermodal](./screenshot.png)
+
 ## Usage and dependencies
 
 The server part, written in Python, depens on some libraries, which are listed
