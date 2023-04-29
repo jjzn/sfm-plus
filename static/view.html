@@ -52,7 +52,12 @@
 						<td>${track}</td>
 					</tr>`);
 
-				// TODO: update clock
+				const [clock, setClock] = useState(get_date());
+				useEffect(() => {
+					const timer = setInterval(() => setClock(get_date()), 1000);
+					return () => clearInterval(timer);
+				}, []);
+
 				return html`
 					<table>
 						<caption class="clock">${get_date()}</caption>
