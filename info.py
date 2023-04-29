@@ -58,13 +58,13 @@ def retrieve_info(code):
         if not split.split(i, im):
             break
 
-        name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '6', 'out/name.png', '-'], capture_output=True).stdout
+        name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/name.png', '-'], capture_output=True).stdout
         name = name.decode().strip().lower().replace(' ', '')
 
-        rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '6', 'out/rest.png', '-'], capture_output=True).stdout
+        rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/rest.png', '-'], capture_output=True).stdout
         rest = rest.decode().strip()
 
-        rest_match = re.search('(\d\d?:\d\d) ?[^ \d]* ?(\d+)$', rest)
+        rest_match = re.search('(\d\d?:\d\d) ?[^ ]* ?(\d+)$', rest)
         if not rest_match:
             break
 
