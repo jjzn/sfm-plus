@@ -65,13 +65,18 @@ def retrieve_info(code):
         rest = rest.decode().strip()
 
         rest_match = re.search('(\d\d?:\d\d) ?[^ \d]* ?(\d+)$', rest)
+        if not rest_match:
+            break
+
         time = rest_match.group(1)
         track = int(rest_match.group(2))
 
         dir = re.search('inca|manacor|sapobla|palma|marratxí|uib', name)
-        if dir:
-            title = station_map.get(dir.group(0), dir.group(0).title())
-            vals.append({ 'title': title, 'time': time, 'track': track })
+        if not dir:
+            break
+
+        title = station_map.get(dir.group(0), dir.group(0).title())
+        vals.append({ 'title': title, 'time': time, 'track': track })
 
     code_idx = list(codes.values()).index(code)
     return {
