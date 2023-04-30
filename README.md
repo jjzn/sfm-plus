@@ -23,3 +23,10 @@ If you plan on hosting an instance of SFM++, keep in mind this project is
 licensed under the [GNU Affero General Public License](https://choosealicense.com/licenses/agpl-3.0/),
 which means that you must disclose the source of any instances you host. For a
 more complete overview, visit the link above or read the [`LICENSE`](./LICENSE).
+
+## Testing
+
+Test data, which includes images and transcriptions in JSON format, are
+included in [`test/`](./test). The tests compare the output of the extractor
+with a manual transcription of the corresponding image. They can be run with
+the `test_runner.sh` Bash script.

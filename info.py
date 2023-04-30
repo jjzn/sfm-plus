@@ -48,7 +48,7 @@ def retrieve_info(im):
 
     for i in range(7):
         if not split.split(i, im):
-            break
+            continue
 
         name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/name.png', '-'], capture_output=True).stdout
         name = name.decode().strip().lower().replace(' ', '')
@@ -58,14 +58,14 @@ def retrieve_info(im):
 
         rest_match = re.search('(\d\d?:\d\d) ?[^ ]* ?(\d+)$', rest)
         if not rest_match:
-            break
+            continue
 
         time = rest_match.group(1)
         track = int(rest_match.group(2))
 
         dir = re.search('inca|manacor|sapobla|palma|marratxí|uib', name)
         if not dir:
-            break
+            continue
 
         title = station_map.get(dir.group(0), dir.group(0).title())
         vals.append({ 'title': title, 'time': time, 'track': track })
