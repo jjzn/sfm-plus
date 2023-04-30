@@ -43,15 +43,7 @@ station_map = {
     'sapobla': 'Sa Pobla'
 }
 
-_session = requests.Session()
-
-def retrieve_info(code):
-    res = _session.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={code}')
-    if not res:
-        raise Exception(f'SFM image request returned {res.status_code}')
-
-    im = io.BytesIO(res.content)
-
+def retrieve_info(im):
     vals = []
 
     for i in range(7):
@@ -78,12 +70,17 @@ def retrieve_info(code):
         title = station_map.get(dir.group(0), dir.group(0).title())
         vals.append({ 'title': title, 'time': time, 'track': track })
 
-    code_idx = list(codes.values()).index(code)
-    return {
-        'station': list(codes.keys())[code_idx],
-        'table': vals
-    }
+    return vals
 
 if __name__ == '__main__':
-    vals = retrieve_info(codes[sys.argv[1]])
-    print(json.dumps(vals))
+    res = requests.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={codes[sys.argv[1]]}')
+    if not res:
+        raise Exception(f'SFM image request returned {res.status_code}')
+
+    im = io.BytesIO(res.content)
+    vals = retrieve_info(im)
+
+    print(json.dumps({
+        'station': sys.argv[1],
+        'table': vals
+    }))
