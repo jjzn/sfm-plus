@@ -39,8 +39,13 @@ codes = {
 }
 
 station_map = {
+    'inca': 'Inca',
+    'manacor': 'Manacor',
     'uib': 'UIB',
-    'sapobla': 'Sa Pobla'
+    'sapobla': 'Sa Pobla',
+    '2afobla': 'Sa Pobla',
+    'palma': 'Palma',
+    'ralma': 'Palma'
 }
 
 def retrieve_info(im):
@@ -50,20 +55,20 @@ def retrieve_info(im):
         if not split.split(i, im):
             continue
 
-        name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/name.png', '-'], capture_output=True).stdout
+        name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '10', 'out/name.png', '-'], capture_output=True).stdout
         name = name.decode().strip().lower().replace(' ', '')
 
         rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/rest.png', '-'], capture_output=True).stdout
         rest = rest.decode().strip()
 
-        rest_match = re.search('(\d\d?:\d\d) ?[^ ]* ?(\d+)$', rest)
+        rest_match = re.search('(?s)(\d\d?:\d\d).+(\d+)$', rest)
         if not rest_match:
             continue
 
         time = rest_match.group(1)
         track = int(rest_match.group(2))
 
-        dir = re.search('inca|manacor|sapobla|palma|marratxí|uib', name)
+        dir = re.search('|'.join(station_map.keys()), name)
         if not dir:
             continue
 
