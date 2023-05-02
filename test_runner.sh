@@ -3,7 +3,6 @@
 set -euo pipefail
 
 fail=0
-total=`ls test/*.jpg | wc -l`
 
 run_case() {
     file="${1:-}"
@@ -41,8 +40,10 @@ EOF
 }
 
 run_all() {
+    total=$#
+
     i=0
-    for file in `basename -s .jpg test/*.jpg`; do
+    for file in "$@"; do
         i=$(($i + 1))
 
         echo -n "[$i/$total] "
@@ -51,16 +52,15 @@ run_all() {
 
     res="TOTAL: $total, FAIL: $fail, OK: $(($total - $fail))"
     res_len=`echo $res | wc -c`
-    echo
     printf '=%.0s' `seq -s' ' $res_len`
     echo
     echo $res
+
+    exit $fail
 }
 
 if [ $# -gt 0 ]; then
-    for case in "$@"; do
-        run_case "$case"
-    done
+    run_all "$@"
 else
-    run_all
+    run_all `basename -s .jpg test/*.jpg`
 fi
