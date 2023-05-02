@@ -1,5 +1,5 @@
-from PIL import Image, ImageOps, ImageFilter, ImageEnhance
 import sys
+from PIL import Image, ImageOps, ImageFilter
 
 off = 160
 h = 79

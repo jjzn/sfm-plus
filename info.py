@@ -1,10 +1,10 @@
 import subprocess
-import split
 import json
 import sys
 import re
 import io
 import requests
+import split
 
 codes = {
   "Intermodal": 1,
@@ -61,7 +61,7 @@ def retrieve_info(im):
         rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/rest.png', '-'], capture_output=True).stdout
         rest = rest.decode().strip()
 
-        rest_match = re.search('(?s)(\d\d?:\d\d).+(\d+)$', rest)
+        rest_match = re.search(r'(?s)(\d\d?:\d\d).+(\d+)$', rest)
         if not rest_match:
             continue
 

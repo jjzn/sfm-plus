@@ -1,10 +1,9 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse
 from datetime import datetime
-import requests
 import json
-import info
 import io
+import requests
+import info
 
 PORT = 8420
 
