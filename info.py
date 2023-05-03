@@ -39,10 +39,12 @@ codes = {
 }
 
 station_map = {
+    'uib': 'UIB',
     'inca': 'Inca',
     'manacor': 'Manacor',
-    'uib': 'UIB',
     'sapobla': 'Sa Pobla',
+    '2apobla': 'Sa Pobla',
+    'safobla': 'Sa Pobla',
     '2afobla': 'Sa Pobla',
     'palma': 'Palma',
     'ralma': 'Palma'
