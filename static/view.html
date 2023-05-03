@@ -12,58 +12,12 @@
 	<body>
 		<script type="module">
 			import { h, Component, render } from 'https://esm.sh/preact';
-			import { useState, useEffect } from 'https://esm.sh/preact/hooks';
+			import { useState } from 'https://esm.sh/preact/hooks';
 			import htm from 'https://esm.sh/htm';
 			import stations from './stations.js';
-
-			const static_data = {"station": "Intermodal", "table": [{"title": "Manacor", "time": "09:30", "track": 7}, {"title": "UIB", "time": "09:35", "track": 2}, {"title": "Sa Pobla", "time": "09:50", "track": 8}, {"title": "UIB", "time": "09:55", "track": 2}, {"title": "Manacor", "time": "10:10", "track": 7}, {"title": "UIB", "time": "10:15", "track": 2}, {"title": "Sa Pobla", "time": "10:30", "track": 8}]};
-
-			const get_date = () => {
-				const now = new Date();
-
-				return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(now);
-			};
+			import Table from './table.js';
 
 			const html = htm.bind(h);
-
-			function Table({station}) {
-				const [data, setData] = useState([]);
-				const [status, setStatus] = useState('ok');
-
-				useEffect(async () => {
-					setStatus('carregant...');
-
-					const res = await fetch(`http://127.0.0.1:8420/${station}`);
-					if (!res.ok) {
-						setStatus('(sense dades)');
-						return;
-					}
-
-					const {table} = await res.json();
-
-					setData(table);
-					setStatus(table.length ? 'ok' : '(cap tren)');
-				}, [station]);
-
-				const rows = data.map(({title, time, track}) => html`
-					<tr>
-						<td>${title}</td>
-						<td>${time}</td>
-						<td>${track}</td>
-					</tr>`);
-
-				const [clock, setClock] = useState(get_date());
-				useEffect(() => {
-					const timer = setInterval(() => setClock(get_date()), 1000);
-					return () => clearInterval(timer);
-				}, []);
-
-				return html`
-					<table>
-						<caption class="clock">${get_date()}</caption>
-						${status == 'ok' ? rows : html`<tr><td>${status}</td></tr>`}
-					</table>`;
-			}
 
 			function StationSelector({setter}) {
 				const set = event => {
