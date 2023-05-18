@@ -10,6 +10,30 @@ const get_date = () => {
 	return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(now);
 };
 
+function Clock({setStale}) {
+	const [clock, setClock] = useState(get_date());
+
+	useEffect(() => {
+		const EXTRA_SECS = 5;
+		const secs = (60 - new Date().getSeconds()) % 60 + EXTRA_SECS;
+		let timer;
+
+		setTimeout(() => {
+			setClock(get_date());
+			setStale(true);
+
+			timer = setInterval(() => {
+				setClock(get_date());
+				setStale(true);
+			}, 60 * 1000);
+		}, secs * 1000);
+
+		return () => clearInterval(timer);
+	}, []);
+
+	return html`<caption class="clock">${clock}</caption>`;
+}
+
 function Table({station}) {
 	const [data, setData] = useState([]);
 	const [status, setStatus] = useState('ok');
@@ -30,24 +54,7 @@ function Table({station}) {
 		setStatus(table.length ? 'ok' : '(cap tren)');
 	}, [station, stale]);
 
-	const [clock, setClock] = useState(get_date());
-	useEffect(() => {
-		const EXTRA_SECS = 5;
-		const secs = (60 - new Date().getSeconds()) % 60 + EXTRA_SECS;
-		let timer;
-
-		setTimeout(() => {
-			setClock(get_date());
-			setStale(true);
-
-			timer = setInterval(() => {
-				setClock(get_date());
-				setStale(true);
-			}, 60 * 1000);
-		}, secs * 1000);
-
-		return () => clearInterval(timer);
-	}, []);
+	useEffect(() => {}, [stale]);
 
 	const rows = data.map(({title, time, track}) => html`
 		<tr>
@@ -58,7 +65,7 @@ function Table({station}) {
 
 	return html`
 		<table>
-			<caption class="clock">${get_date()}</caption>
+			<${Clock} setStale=${val => setStale(val)} />
 			${status == 'ok' ? rows : html`<tr><td>${status}</td></tr>`}
 		</table>`;
 }
