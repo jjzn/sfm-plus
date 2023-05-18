@@ -13,6 +13,7 @@ const get_date = () => {
 function Table({station}) {
 	const [data, setData] = useState([]);
 	const [status, setStatus] = useState('ok');
+	const [stale, setStale] = useState(false);
 
 	useEffect(async () => {
 		setStatus('carregant...');
@@ -27,7 +28,26 @@ function Table({station}) {
 
 		setData(table);
 		setStatus(table.length ? 'ok' : '(cap tren)');
-	}, [station]);
+	}, [station, stale]);
+
+	const [clock, setClock] = useState(get_date());
+	useEffect(() => {
+		const EXTRA_SECS = 5;
+		const secs = (60 - new Date().getSeconds()) % 60 + EXTRA_SECS;
+		let timer;
+
+		setTimeout(() => {
+			setClock(get_date());
+			setStale(true);
+
+			timer = setInterval(() => {
+				setClock(get_date());
+				setStale(true);
+			}, 60 * 1000);
+		}, secs * 1000);
+
+		return () => clearInterval(timer);
+	}, []);
 
 	const rows = data.map(({title, time, track}) => html`
 		<tr>
@@ -35,12 +55,6 @@ function Table({station}) {
 			<td>${time}</td>
 			<td>${track}</td>
 		</tr>`);
-
-	const [clock, setClock] = useState(get_date());
-	useEffect(() => {
-		const timer = setInterval(() => setClock(get_date()), 1000);
-		return () => clearInterval(timer);
-	}, []);
 
 	return html`
 		<table>
