@@ -1,11 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime
+import argparse
 import json
 import io
 import requests
 import info
-
-PORT = 8420
 
 class TrainServer(BaseHTTPRequestHandler):
     cache = {}
@@ -49,6 +48,11 @@ class TrainServer(BaseHTTPRequestHandler):
         })
         self.wfile.write(bytes(mesg + '\n', 'utf-8'))
 
-server = HTTPServer(('', PORT), TrainServer)
-print(f'serving on port {PORT}')
-server.serve_forever()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--port', type=int, default=8420)
+    args = parser.parse_args()
+
+    server = HTTPServer(('', args.port), TrainServer)
+    print(f'serving on port {args.port}')
+    server.serve_forever()
