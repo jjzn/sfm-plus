@@ -74,11 +74,7 @@ function Table({station}) {
 	return html`
 		<table>
 			<${Clock} setStale=${val => setStale(val)} />
-			${status == 'ok' ? rows : html`<tr>
-				<td>${status}</td>
-				<td></td>
-				<td></td>
-			</tr>`}
+			${status == 'ok' ? rows : html`<tr><td>${status}</td></tr>`}
 		</table>`;
 }
 

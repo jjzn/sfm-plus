@@ -26,11 +26,16 @@ body {
 	}
 }
 
+@media (max-width: 400px) {
+	table { width: 100%; }
+}
+
 table { border-collapse: collapse; }
 tr { border: 1px solid currentcolor; }
 td, th { padding: .5em; }
 :is(td, th) + :is(td, th) { padding-left: 2em; }
 
+table > * { width: 100%; }
 table caption { min-width: max-content; }
 
 .clock {
@@ -52,6 +57,7 @@ select {
 
 	appearance: none;
 	padding: 0 .25em;
+	padding-right: 1.25em;
 	background-size: 1em;
 	background-repeat: no-repeat;
 	background-position: right;
