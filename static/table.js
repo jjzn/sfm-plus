@@ -63,10 +63,22 @@ function Table({station}) {
 			<td>${track}</td>
 		</tr>`);
 
+	rows.unshift(html`
+		<tr>
+			<th>Destinació</th>
+			<th>Hora</th>
+			<th>Via</th>
+		</tr>
+	`);
+
 	return html`
 		<table>
 			<${Clock} setStale=${val => setStale(val)} />
-			${status == 'ok' ? rows : html`<tr><td>${status}</td></tr>`}
+			${status == 'ok' ? rows : html`<tr>
+				<td>${status}</td>
+				<td></td>
+				<td></td>
+			</tr>`}
 		</table>`;
 }
 
