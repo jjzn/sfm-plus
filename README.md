@@ -50,3 +50,8 @@ Test data, which includes images and transcriptions in JSON format, are
 included in [`test/`](./test). The tests compare the output of the extractor
 with a manual transcription of the corresponding image. They can be run with
 the `test_runner.sh` Bash script.
+
+## Roadmap and To-do
+
+- [ ] Only re-render the table after data has been fetched from the server
+- [ ] Reduce time spent on data extraction in the server

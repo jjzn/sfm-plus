@@ -35,7 +35,7 @@ tr { border: 1px solid currentcolor; }
 td, th { padding: .5em; }
 :is(td, th) + :is(td, th) { padding-left: 2em; }
 
-table > * { width: 100%; }
+table > :not(caption) { width: 100%; }
 table caption { min-width: max-content; }
 
 .clock {
