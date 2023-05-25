@@ -10,7 +10,7 @@ const get_date = () => {
 	return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(now);
 };
 
-function Clock({setStale}) {
+function Clock({updated, setStale}) {
 	const [clock, setClock] = useState(get_date());
 
 	useEffect(() => {
@@ -31,11 +31,14 @@ function Clock({setStale}) {
 		return () => clearInterval(timer);
 	}, []);
 
-	return html`<caption class="clock">${clock}</caption>`;
+	const hours = Math.floor(updated / 60).toString().padStart(2, 0)
+	const mins = (updated % 60).toString().padStart(2, 0);
+
+	return html`<caption class="clock">${clock} (actualitzat ${hours}:${mins})</caption>`;
 }
 
 function Table({station}) {
-	const [data, setData] = useState([]);
+	const [data, setData] = useState({ updated: 0, table: [] });
 	const [status, setStatus] = useState('ok');
 	const [stale, setStale] = useState(false);
 
@@ -48,15 +51,14 @@ function Table({station}) {
 			return;
 		}
 
-		const {table} = await res.json();
-
-		setData(table);
-		setStatus(table.length ? 'ok' : '(cap tren)');
+		const json = await res.json();
+		setData(json);
+		setStatus(json.table.length ? 'ok' : '(cap tren)');
 	}, [station, stale]);
 
 	useEffect(() => {}, [stale]);
 
-	const rows = data.map(({title, time, track}) => html`
+	const rows = data.table.map(({title, time, track}) => html`
 		<tr>
 			<td>${title}</td>
 			<td>${time}</td>
@@ -73,7 +75,7 @@ function Table({station}) {
 
 	return html`
 		<table>
-			<${Clock} setStale=${val => setStale(val)} />
+			<${Clock} updated=${data.updated} setStale=${val => setStale(val)} />
 			${status == 'ok' ? rows : html`<tr><td>${status}</td></tr>`}
 		</table>`;
 }

@@ -23,7 +23,7 @@ class TrainServer(BaseHTTPRequestHandler):
         t = now.hour * 60 + now.minute
 
         if code in self.cache and self.cache[code][0] >= t:
-            table = self.cache[code][1]
+            cached_time, table = self.cache[code]
         else:
             res = self.session.get(f'https://info.trensfm.com/sapi/ivi_imagen?ubicacion={code}')
             if not res:
@@ -32,6 +32,7 @@ class TrainServer(BaseHTTPRequestHandler):
 
             im = io.BytesIO(res.content)
             table = info.retrieve_info(im)
+            cached_time = t
             self.cache[code] = (t, table)
 
         self.send_response(200)
@@ -44,6 +45,7 @@ class TrainServer(BaseHTTPRequestHandler):
 
         mesg = json.dumps({
             'station': codes_keys[codes_vals.index(code)],
+            'updated': cached_time,
             'table': table
         })
         self.wfile.write(bytes(mesg + '\n', 'utf-8'))
