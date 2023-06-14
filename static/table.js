@@ -73,10 +73,20 @@ function Table({station}) {
 		</tr>
 	`);
 
+	const fallback = html`<tr>
+		<th>Destinació</th>
+			<th>Hora</th>
+			<th>Via</th>
+		</tr>
+		<tr>
+			<td>${status}</td>
+		</tr>
+	`;
+
 	return html`
 		<table>
 			<${Clock} updated=${data.updated} setStale=${val => setStale(val)} />
-			${status == 'ok' ? rows : html`<tr><td>${status}</td></tr>`}
+			${status == 'ok' ? rows : fallback}
 		</table>`;
 }
 

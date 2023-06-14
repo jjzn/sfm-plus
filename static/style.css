@@ -36,15 +36,12 @@ td, th { padding: .5em; }
 :is(td, th) + :is(td, th) { padding-left: 2em; }
 
 table > :not(caption) { width: 100%; }
-table caption { min-width: max-content; }
 
 .clock {
-	border: 1px solid currentcolor;
-	border-bottom: none;
-
-	padding: .5rem;
 	font-style: italic;
 	text-align: center;
+	caption-side: bottom;
+	margin-top: .5em;
 }
 
 select {
