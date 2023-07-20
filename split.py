@@ -2,7 +2,7 @@ import sys
 from PIL import Image, ImageOps, ImageFilter
 
 off = 160
-h = 79
+h = 80
 
 def regions(width):
     if width > 1280: # hack for stations on the M1
@@ -29,8 +29,9 @@ def split(n, im_raw):
             width = width[1]
 
         reg = im.crop(box(n, x, width)).convert('L')
-        reg = reg.filter(ImageFilter.MedianFilter())
-        #reg = ImageEnhance.Contrast(reg).enhance(2)
+        reg = reg.filter(ImageFilter.MaxFilter(3))
+        reg = reg.filter(ImageFilter.MedianFilter(7))
+        reg = reg.filter(ImageFilter.MinFilter(5))
 
         colors = reg.convert('1', dither=Image.Dither.NONE).getcolors()
         if len(colors) < 2:

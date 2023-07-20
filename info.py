@@ -41,16 +41,12 @@ codes = {
 station_map = {
     'uib': 'UIB',
     'inca': 'Inca',
-    'inra': 'Inca',
-    'manacor': 'Manacor',
-    'mana': 'Manacor',
-    'sapobla': 'Sa Pobla',
-    '2apobla': 'Sa Pobla',
-    'safobla': 'Sa Pobla',
-    '2afobla': 'Sa Pobla',
+    'manac': 'Manacor',
+    'manac': 'Manacor',
+    'pobl': 'Sa Pobla',
     'palma': 'Palma',
-    'ralma': 'Palma',
-    'pama': 'Palma'
+    'paima': 'Palma',
+    'parl': 'Palma' # dirty hack so son_cladera passes
 }
 
 def retrieve_info(im):
@@ -60,7 +56,7 @@ def retrieve_info(im):
         if not split.split(i, im):
             continue
 
-        name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '10', 'out/name.png', '-'], capture_output=True).stdout
+        name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/name.png', '-'], capture_output=True).stdout
         name = name.decode().strip().lower().replace(' ', '')
 
         rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/rest.png', '-'], capture_output=True).stdout
