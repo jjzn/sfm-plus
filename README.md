@@ -20,8 +20,8 @@ Run these commands:
     cd sfm-plus
 
     # install dependencies
-    python3 -m venv env
-    source env/bin/activate
+    python3 -m venv .env
+    source .env/bin/activate
     pip3 install -r requirements.txt
 
     mkdir out
@@ -32,7 +32,7 @@ Run these commands:
 The server part, written in Python, depends on some libraries, which are listed
 in `requirements.txt`. You can install these by running
 `pip3 install -r requirements.txt`, either globally or in a virtual environment
-(with `python3 -m venv env`). In addition, it requires a working installation
+(with `python3 -m venv .env`). In addition, it requires a working installation
 of Tesseract 4. A known working version is `4.1.1`.
 
 After installing all the required dependencies, you can run the server by
