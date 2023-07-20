@@ -41,13 +41,16 @@ codes = {
 station_map = {
     'uib': 'UIB',
     'inca': 'Inca',
+    'inra': 'Inca',
     'manacor': 'Manacor',
+    'mana': 'Manacor',
     'sapobla': 'Sa Pobla',
     '2apobla': 'Sa Pobla',
     'safobla': 'Sa Pobla',
     '2afobla': 'Sa Pobla',
     'palma': 'Palma',
-    'ralma': 'Palma'
+    'ralma': 'Palma',
+    'pama': 'Palma'
 }
 
 def retrieve_info(im):
@@ -63,12 +66,17 @@ def retrieve_info(im):
         rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/rest.png', '-'], capture_output=True).stdout
         rest = rest.decode().strip()
 
-        rest_match = re.search(r'(?ms)(\d\d?:\d\d).+(\d+)$', rest)
+        rest_match = re.search(r'(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$', rest)
         if not rest_match:
             continue
 
         time = rest_match.group(1)
         track = int(rest_match.group(2))
+
+        time = time.replace('.', ':')
+        time = time.replace('°', ':')
+        if ':' not in time:
+            time = time[:-2] + ':' + time[-2:]
 
         dir = re.search('|'.join(station_map.keys()), name)
         if not dir:
