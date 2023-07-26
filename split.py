@@ -1,5 +1,6 @@
 import sys
-from PIL import Image, ImageOps, ImageFilter
+import cv2 as cv
+import numpy as np
 
 off = 160
 h = 80
@@ -20,30 +21,37 @@ def box(n, x, w):
     return (x, off + h * n, x + w, off + h * (n + 1))
 
 def split(n, im_raw):
-    im = Image.open(im_raw)
+    im = cv.imread(im_raw)
 
     x = 0
-    for name, width in regions(im.width).items():
+    for name, width in regions(im.shape[1]).items():
         if isinstance(width, (list, tuple)):
             x += width[0]
             width = width[1]
 
-        reg = im.crop(box(n, x, width)).convert('L')
-        reg = reg.filter(ImageFilter.MaxFilter(3))
-        reg = reg.filter(ImageFilter.MedianFilter(7))
-        reg = reg.filter(ImageFilter.MinFilter(5))
+        # crop image and convert to grayscale
+        y = off + h * n
+        reg = im[y:y+h, x:x+width].copy()
+        reg = cv.cvtColor(reg, cv.COLOR_RGB2GRAY)
 
-        colors = reg.convert('1', dither=Image.Dither.NONE).getcolors()
-        if len(colors) < 2:
-            return False
+        # apply a (rectangular) max filter with size 3x3
+        reg = cv.dilate(reg, cv.getStructuringElement(cv.MORPH_RECT, (3, 3)))
 
-        black, white = colors
-        if black[0] > white[0]:
-            reg = ImageOps.invert(reg)
+        reg = cv.medianBlur(reg, 7)
 
-        reg = ImageOps.expand(reg, border=12, fill=0xffffff).convert('1', dither=Image.Dither.NONE)
+        # apply a min filter with size 5x5
+        reg = cv.erode(reg, cv.getStructuringElement(cv.MORPH_RECT, (5, 5)))
 
-        reg.save(f'out/{name}.png')
+        _, reg = cv.threshold(reg, 0, 255, cv.THRESH_OTSU)
+
+        black, white = np.unique(reg, return_counts=True)[1]
+        if black > white:
+            reg = cv.bitwise_not(reg)
+
+        # add white 12px border
+        reg = cv.copyMakeBorder(reg, 12, 12, 12, 12, cv.BORDER_CONSTANT, None, 255)
+
+        cv.imwrite(f'out/{name}.png', reg)
 
         x += width
 
