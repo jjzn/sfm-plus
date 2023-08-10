@@ -41,9 +41,10 @@ codes = {
 station_map = {
     'uib': 'UIB',
     'inca': 'Inca',
-    'manac': 'Manacor',
-    'manac': 'Manacor',
-    'pobl': 'Sa Pobla',
+    'man': 'Manacor',
+    'pob': 'Sa Pobla',
+    'sapo': 'Sa Pobla',
+    'obla': 'Sa Pobla',
     'palma': 'Palma',
     'paima': 'Palma',
     'parl': 'Palma' # dirty hack so son_cladera passes
@@ -58,11 +59,13 @@ def retrieve_info(im):
 
         name = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/name.png', '-'], capture_output=True).stdout
         name = name.decode().strip().lower().replace(' ', '')
+        # TODO: maybe replace capital I with lowercase l in the output
+        # Tesseract seems to frequently swap these two letters
 
         rest = subprocess.run(['tesseract', '--dpi', '300', '--psm', '11', 'out/rest.png', '-'], capture_output=True).stdout
         rest = rest.decode().strip()
 
-        rest_match = re.search(r'(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$', rest)
+        rest_match = re.search(r'(?ms)(\d\d?[:° \.]?\d\d).+(\d+)$', rest)
         if not rest_match:
             continue
 
@@ -71,6 +74,7 @@ def retrieve_info(im):
 
         time = time.replace('.', ':')
         time = time.replace('°', ':')
+        time = time.replace(' ', ':')
         if ':' not in time:
             time = time[:-2] + ':' + time[-2:]
 

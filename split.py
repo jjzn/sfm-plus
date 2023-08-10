@@ -2,7 +2,7 @@ import sys
 import cv2 as cv
 import numpy as np
 
-off = 160
+off = 155
 h = 80
 
 def regions(width):
