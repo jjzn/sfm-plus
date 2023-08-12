@@ -1,6 +1,6 @@
 use rusty_tesseract::Image;
 use opencv::imgproc::*;
-use opencv::core::{Mat, Point, Size, Vector, BORDER_CONSTANT};
+use opencv::core::{Mat, Point, Size, Vector, BORDER_CONSTANT, copy_make_border};
 use std::io::Read;
 
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
@@ -30,6 +30,29 @@ fn structuring_rect(width: i32, height: i32) -> Mat {
             Size { width, height },
             Point::new(-1, -1))
         .unwrap()
+}
+
+fn transform_image(img: &mut Vector<u8>) {
+    let _ = cvt_color(&img.clone(), img, COLOR_RGB2GRAY, 0);
+
+    let _ = dilate(
+        &img.clone(), img, &structuring_rect(3, 3),
+        Point::new(-1, -1), 1,
+        BORDER_CONSTANT, morphology_default_border_value().unwrap());
+
+    let _ = median_blur(&img.clone(), img, 7);
+
+    let _ = erode(
+        &img.clone(), img, &structuring_rect(5, 5),
+        Point::new(-1, -1), 1,
+        BORDER_CONSTANT, morphology_default_border_value().unwrap());
+
+    let _ = threshold(&img.clone(), img, 0., 255., THRESH_OTSU);
+
+    // TODO: invert image if dark background is present
+
+    let _ = copy_make_border(
+        &img.clone(), img, 12, 12, 12, 12, BORDER_CONSTANT, 255.into());
 }
 
 fn split_region(path: &str, idx: u32) -> (Image, Image) {
@@ -64,22 +87,8 @@ fn split_region(path: &str, idx: u32) -> (Image, Image) {
         .into_raw()
         .into();
 
-    let _ = cvt_color(&name_img.clone(), &mut name_img, COLOR_RGB2GRAY, 0);
-    let _ = cvt_color(&rest_img.clone(), &mut rest_img, COLOR_RGB2GRAY, 0);
-
-    let _ = dilate(
-        &name_img.clone(), &mut name_img, &structuring_rect(3, 3),
-        Point::new(-1, -1), 1,
-        BORDER_CONSTANT, morphology_default_border_value().unwrap());
-
-    let _ = median_blur(&name_img.clone(), &mut name_img, 7);
-
-    let _ = erode(
-        &name_img.clone(), &mut name_img, &structuring_rect(5, 5),
-        Point::new(-1, -1), 1,
-        BORDER_CONSTANT, morphology_default_border_value().unwrap());
-
-    let _ = threshold(&name_img.clone(), &mut name_img, 0., 255., THRESH_OTSU);
+    transform_image(&mut name_img);
+    transform_image(&mut rest_img);
 
     (vector_to_image(name_img), vector_to_image(rest_img))
 }
