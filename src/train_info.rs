@@ -1,7 +1,11 @@
 use rusty_tesseract::Image;
+use image::GenericImageView;
+use opencv::imgproc::*;
 use std::io::Read;
 
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
+const IMAGE_ELEMENT_OFFSET: u32 = 155;
+const IMAGE_ELEMENT_HEIGHT: u32 = 80;
 
 pub struct TrainTime {
     hour: u8,
@@ -14,7 +18,7 @@ pub struct Train {
     track: u8
 }
 
-fn split_region(path: &str, idx: u8) -> (Image, Image) {
+fn split_region(path: &str, idx: u32) -> (Image, Image) {
     let response = ureq::get(path).call().unwrap();
 
     let len: usize = response
@@ -28,10 +32,16 @@ fn split_region(path: &str, idx: u8) -> (Image, Image) {
         .take(MAX_IMAGE_BYTES as u64)
         .read_to_end(&mut bytes);
 
-    let img = image::load_from_memory(&bytes).unwrap();
-    let tess_img = Image::from_dynamic_image(&img).unwrap();
+    let mut img = image::load_from_memory(&bytes).unwrap();
 
-    (tess_img, tess_img)
+    let name_img = image::imageops::crop(
+            &mut img,
+            0, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
+            342, IMAGE_ELEMENT_HEIGHT)
+        .to_image()
+        .as_raw();
+
+    name_img
 }
 
 pub fn retrieve(path: &str) -> Vec<Train> {
