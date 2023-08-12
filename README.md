@@ -19,25 +19,18 @@ Run these commands:
     git clone https://github.com/jjzn/sfm-plus.git
     cd sfm-plus
 
-    # install dependencies
-    python3 -m venv .env
-    source .env/bin/activate
-    pip3 install -r requirements.txt
-
-    mkdir out
-    python3 server.py
+    cargo run
 
 ### The long story
 
-The server part, written in Python, depends on some libraries, which are listed
-in `requirements.txt`. You can install these by running
-`pip3 install -r requirements.txt`, either globally or in a virtual environment
-(with `python3 -m venv .env`). In addition, it requires a working installation
-of Tesseract 4. A known working version is `4.1.1`.
+The server part, written in Rust, depends on some libraries, which are listed
+in `Cargo.toml` and will be automatically installed by Cargo. In addition, it
+requires a working installation of Tesseract 4 (known working version `4.1.1`)
+and of OpenCV.
 
-After installing all the required dependencies, you can run the server by
-running `python3 server.py`. As the OCR extractor assumes a certain folder
-structure, you will need to create a `out/` folder first (`mkdir out`).
+After having installed all the system dependencies, you can build and start the
+server by running `cargo run`. Alternatively, you can directly invoke the build
+executable, which will be located somewhere in `target/`.
 
 If you plan on hosting an instance of SFM++, keep in mind this project is
 licensed under the [GNU Affero General Public License](https://choosealicense.com/licenses/agpl-3.0/),
