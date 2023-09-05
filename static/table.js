@@ -38,7 +38,7 @@ function Clock({updated, setStale}) {
 }
 
 function Table({station}) {
-	const [data, setData] = useState({ updated: 0, table: [] });
+	const [data, setData] = useState([]);
 	const [status, setStatus] = useState('ok');
 	const [stale, setStale] = useState(false);
 
@@ -53,15 +53,15 @@ function Table({station}) {
 
 		const json = await res.json();
 		setData(json);
-		setStatus(json.table.length ? 'ok' : '(cap tren)');
+		setStatus(json.length ? 'ok' : '(cap tren)');
 	}, [station, stale]);
 
 	useEffect(() => {}, [stale]);
 
-	const rows = data.table.map(({title, time, track}) => html`
+	const rows = data.map(({headsign, time, track}) => html`
 		<tr>
-			<td>${title}</td>
-			<td>${time}</td>
+			<td>${headsign}</td>
+			<td>${time.hour}:${time.minute}</td>
 			<td>${track}</td>
 		</tr>`);
 
@@ -85,7 +85,7 @@ function Table({station}) {
 
 	return html`
 		<table>
-			<${Clock} updated=${data.updated} setStale=${val => setStale(val)} />
+			<${Clock} updated=${0} setStale=${val => setStale(val)} />
 			${status == 'ok' ? rows : fallback}
 		</table>`;
 }
