@@ -1,6 +1,6 @@
 use rusty_tesseract::Image;
 use opencv::imgproc::*;
-use opencv::core::{Mat, Point, Size, VecN, BORDER_CONSTANT, copy_make_border};
+use opencv::core::*;
 use opencv::prelude::{MatTraitConst, MatTraitConstManual};
 use std::io::Read;
 use std::convert::TryInto;
@@ -54,7 +54,16 @@ fn transform_image(img: &mut Mat) {
 
     let _ = threshold(&img.clone(), img, 0., 255., THRESH_OTSU);
 
-    // TODO: invert image if dark background is present
+    let (n_black, n_white) = {
+        let vals: &[u8] = img.data_typed().unwrap();
+        let count = |n| vals.iter().filter(|&&x| x == n).count();
+
+        (count(0), count(255))
+    };
+
+    if n_black > n_white {
+        let _ = bitwise_not(&img.clone(), img, &no_array());
+    }
 
     let _ = copy_make_border(
         &img.clone(), img, 12, 12, 12, 12, BORDER_CONSTANT, 255.into());
