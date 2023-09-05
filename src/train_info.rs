@@ -1,6 +1,7 @@
 use rusty_tesseract::Image;
 use opencv::imgproc::*;
-use opencv::core::{Mat, Point, Size, Vector, BORDER_CONSTANT, copy_make_border};
+use opencv::core::{Mat, Point, Size, BORDER_CONSTANT, copy_make_border};
+use opencv::prelude::{MatTraitConst, MatTraitConstManual};
 use std::io::Read;
 
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
@@ -32,7 +33,7 @@ fn structuring_rect(width: i32, height: i32) -> Mat {
         .unwrap()
 }
 
-fn transform_image(img: &mut Vector<u8>) {
+fn transform_image(img: &mut Mat) {
     let _ = cvt_color(&img.clone(), img, COLOR_RGB2GRAY, 0);
 
     let _ = dilate(
@@ -55,6 +56,17 @@ fn transform_image(img: &mut Vector<u8>) {
         &img.clone(), img, 12, 12, 12, 12, BORDER_CONSTANT, 255.into());
 }
 
+fn crop_image(img: &mut image::DynamicImage, x: u32, y: u32, w: u32, h: u32) -> Mat {
+    let imbuf = image::imageops::crop(img, x, y, w, h).to_image();
+    let (cols, rows) = imbuf.dimensions();
+
+    Mat::from_slice_rows_cols(
+            imbuf.as_raw(),
+            rows as usize,
+            cols as usize)
+        .unwrap()
+}
+
 fn split_region(path: &str, idx: u32) -> (Image, Image) {
     let response = ureq::get(path).call().unwrap();
 
@@ -71,26 +83,20 @@ fn split_region(path: &str, idx: u32) -> (Image, Image) {
 
     let mut img = image::load_from_memory(&bytes).unwrap();
 
-    let mut name_img: Vector<_> = image::imageops::crop(
-            &mut img,
-            0, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
-            342, IMAGE_ELEMENT_HEIGHT)
-        .to_image()
-        .into_raw()
-        .into();
+    let mut name_img = crop_image(
+        &mut img,
+        0, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
+        427, IMAGE_ELEMENT_HEIGHT);
 
-    let mut rest_img: Vector<_> = image::imageops::crop(
-            &mut img,
-            342, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
-            427, IMAGE_ELEMENT_HEIGHT)
-        .to_image()
-        .into_raw()
-        .into();
+    let mut rest_img = crop_image(
+        &mut img,
+        342, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
+        427, IMAGE_ELEMENT_HEIGHT);
 
     transform_image(&mut name_img);
     transform_image(&mut rest_img);
 
-    (vector_to_image(name_img), vector_to_image(rest_img))
+    (mat_to_image(name_img), mat_to_image(rest_img))
 }
 
 pub fn retrieve(path: &str) -> Vec<Train> {
