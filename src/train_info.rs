@@ -19,10 +19,13 @@ pub struct Train {
     track: u8
 }
 
-fn vector_to_image(vector: Vector<u8>) -> rusty_tesseract::Image {
-    let img = image::load_from_memory(&vector.to_vec()).unwrap();
+fn mat_to_image(mat: Mat) -> rusty_tesseract::Image {
+    let vec = mat.data_typed().unwrap().to_vec();
+    let size = mat.size().unwrap();
+    let img: image::GrayImage = image::ImageBuffer::from_raw(
+            size.width as u32, size.height as u32, vec).unwrap();
 
-    rusty_tesseract::Image::from_dynamic_image(&img).unwrap()
+    rusty_tesseract::Image::from_dynamic_image(&img.into()).unwrap()
 }
 
 fn structuring_rect(width: i32, height: i32) -> Mat {
