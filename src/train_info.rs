@@ -6,6 +6,8 @@ use regex::Regex;
 use std::io::Read;
 use std::convert::TryInto;
 
+use rocket::serde::Serialize;
+
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
 const IMAGE_ELEMENT_OFFSET: u32 = 155;
 const IMAGE_ELEMENT_HEIGHT: u32 = 80;
@@ -20,7 +22,8 @@ const HEADSIGNS: phf::Map<&str, &str> = phf::phf_map! {
     "palma" => "Palma"
 };
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
 pub struct TrainTime {
     hour: u8,
     minute: u8
@@ -58,7 +61,8 @@ impl TryFrom<String> for TrainTime {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
 pub struct Train {
     headsign: String,
     time: TrainTime,

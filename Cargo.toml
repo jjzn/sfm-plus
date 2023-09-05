@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rocket = "0.5.0-rc.3"
+rocket = { version = "0.5.0-rc.3", features = ["json"] }
 rusty-tesseract = "1.1.7"
 ureq = "2.7.1"
 image = "0.24.7"
