@@ -2,6 +2,7 @@ use rusty_tesseract::Image;
 use opencv::imgproc::*;
 use opencv::core::*;
 use opencv::prelude::{MatTraitConst, MatTraitConstManual};
+use regex::Regex;
 use std::io::Read;
 use std::convert::TryInto;
 
@@ -9,6 +10,17 @@ const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
 const IMAGE_ELEMENT_OFFSET: u32 = 155;
 const IMAGE_ELEMENT_HEIGHT: u32 = 80;
 
+const HEADSIGNS: phf::Map<&str, &str> = phf::phf_map! {
+    "ub" => "UIB",
+    "uib" => "UIB",
+    "inca" => "Inca",
+    "man" => "Manacor",
+    "sapo" => "Sa Pobla",
+    "obla" => "Sa Pobla",
+    "palma" => "Palma"
+};
+
+#[derive(Debug)]
 pub struct TrainTime {
     hour: u8,
     minute: u8
@@ -120,6 +132,8 @@ fn split_region(path: &str, idx: u32) -> (Image, Image) {
 }
 
 pub fn retrieve(path: &str) -> Vec<Train> {
+    let mut results = vec![];
+
     for i in 0..7 {
         let (name_img, rest_img) = split_region(path, i);
         let tess_args = rusty_tesseract::Args {
@@ -131,10 +145,40 @@ pub fn retrieve(path: &str) -> Vec<Train> {
         };
 
         let name = rusty_tesseract::image_to_string(&name_img, &tess_args)
-            .unwrap().trim();
+            .unwrap().trim().to_lowercase().replace(" ", "");
         let rest = rusty_tesseract::image_to_string(&rest_img, &tess_args)
-            .unwrap().trim();
+            .unwrap().trim().to_lowercase().replace(" ", "");
+
+        let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$").unwrap();
+        let Some(rest_match) = re.captures(&rest) else { continue };
+
+        println!(">>> {}", name);
+
+        let track = &rest_match[2];
+        let time = {
+            let mut aux = String::from(&rest_match[1])
+                .replace("°", ":")
+                .replace(".", ":");
+
+            if !aux.contains(':') {
+                aux.insert(aux.len() - 2, ':')
+            }
+
+            aux
+        };
+
+        let headsign = {
+            let Some(found) = HEADSIGNS.keys().find(|&key| name.contains(key)) else { continue };
+            HEADSIGNS.get(found).unwrap()
+        };
+
+        println!("{} {} {}", headsign, time, track);
+        results.push(Train {
+            headsign: headsign.to_string(),
+            time: time.try_into().unwrap(),
+            track: track.parse().unwrap()
+        });
     }
 
-    vec![]
+    results
 }
