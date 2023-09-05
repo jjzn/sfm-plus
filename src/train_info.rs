@@ -136,22 +136,7 @@ fn crop_image(img: &mut image::DynamicImage, x: u32, y: u32, w: u32, h: u32) -> 
         .unwrap()
 }
 
-fn split_region(path: &str, idx: u32) -> (Image, Image) {
-    let response = ureq::get(path).call().unwrap();
-
-    let len: usize = response
-        .header("Content-Length")
-        .map(|s| s.parse().unwrap())
-        .unwrap_or(MAX_IMAGE_BYTES);
-
-    let mut bytes = Vec::with_capacity(len);
-    let _ = response
-        .into_reader()
-        .take(MAX_IMAGE_BYTES as u64)
-        .read_to_end(&mut bytes);
-
-    let mut img = image::load_from_memory(&bytes).unwrap();
-
+fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
     let mut name_img = crop_image(
         &mut img,
         0, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
@@ -171,8 +156,25 @@ fn split_region(path: &str, idx: u32) -> (Image, Image) {
 pub fn retrieve(path: &str) -> Vec<Train> {
     let mut results = vec![];
 
+    let img = {
+        let response = ureq::get(path).call().unwrap();
+
+        let len: usize = response
+            .header("Content-Length")
+            .map(|s| s.parse().unwrap())
+            .unwrap_or(MAX_IMAGE_BYTES);
+
+        let mut bytes = Vec::with_capacity(len);
+        let _ = response
+            .into_reader()
+            .take(MAX_IMAGE_BYTES as u64)
+            .read_to_end(&mut bytes);
+
+        image::load_from_memory(&bytes).unwrap()
+    };
+
     for i in 0..7 {
-        let (name_img, rest_img) = split_region(path, i);
+        let (name_img, rest_img) = split_region(img.clone(), i);
         let tess_args = rusty_tesseract::Args {
             config_variables: std::collections::HashMap::new(),
             lang: "eng".into(),
