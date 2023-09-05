@@ -1,8 +1,9 @@
 use rusty_tesseract::Image;
 use opencv::imgproc::*;
-use opencv::core::{Mat, Point, Size, BORDER_CONSTANT, copy_make_border};
+use opencv::core::{Mat, Point, Size, VecN, BORDER_CONSTANT, copy_make_border};
 use opencv::prelude::{MatTraitConst, MatTraitConstManual};
 use std::io::Read;
+use std::convert::TryInto;
 
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
 const IMAGE_ELEMENT_OFFSET: u32 = 155;
@@ -19,13 +20,13 @@ pub struct Train {
     track: u8
 }
 
-fn mat_to_image(mat: Mat) -> rusty_tesseract::Image {
+fn mat_to_image(mat: Mat) -> Image {
     let vec = mat.data_typed().unwrap().to_vec();
     let size = mat.size().unwrap();
     let img: image::GrayImage = image::ImageBuffer::from_raw(
             size.width as u32, size.height as u32, vec).unwrap();
 
-    rusty_tesseract::Image::from_dynamic_image(&img.into()).unwrap()
+    Image::from_dynamic_image(&img.into()).unwrap()
 }
 
 fn structuring_rect(width: i32, height: i32) -> Mat {
@@ -63,8 +64,15 @@ fn crop_image(img: &mut image::DynamicImage, x: u32, y: u32, w: u32, h: u32) -> 
     let imbuf = image::imageops::crop(img, x, y, w, h).to_image();
     let (cols, rows) = imbuf.dimensions();
 
+    let pixels: Vec<VecN<u8, 4>> = imbuf
+        .into_raw()
+        .chunks(4)
+        .map(|x| x.try_into().unwrap())
+        .map(|x: [u8; 4]| x.into())
+        .collect();
+
     Mat::from_slice_rows_cols(
-            imbuf.as_raw(),
+            &pixels,
             rows as usize,
             cols as usize)
         .unwrap()
