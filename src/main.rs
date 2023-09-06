@@ -1,9 +1,12 @@
 #[macro_use] extern crate rocket;
 
+mod provider_sfm;
+mod types;
+
 use rocket::serde::json::Json;
 use rocket::fairing::{Fairing, Info, Kind};
 
-mod provider_sfm;
+use crate::types::*;
 
 struct Cors();
 
@@ -22,7 +25,7 @@ impl Fairing for Cors {
 }
 
 #[get("/sfm/<code>")]
-fn info_sfm(code: u8) -> Json<Vec<provider_sfm::Train>> {
+fn info_sfm(code: u8) -> Json<Vec<Trip>> {
     Json(provider_sfm::retrieve(code))
 }
 
