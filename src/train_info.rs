@@ -176,7 +176,9 @@ pub fn retrieve(path: &str) -> Vec<Train> {
     for i in 0..7 {
         let (name_img, rest_img) = split_region(img.clone(), i);
         let tess_args = rusty_tesseract::Args {
-            config_variables: std::collections::HashMap::new(),
+            config_variables: std::collections::HashMap::from([
+                ("tessedit_do_invert".into(), "0".into())
+            ]),
             lang: "eng".into(),
             dpi: Some(300),
             psm: Some(11),
