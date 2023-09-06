@@ -26,6 +26,11 @@ jobs:
         with:
           version: 15
 
+      - name: Install OpenCV
+        run: |
+          sudo apt update
+          sudo apt install libopencv-dev
+
       - name: Build binaries
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
