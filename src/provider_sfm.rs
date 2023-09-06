@@ -11,6 +11,7 @@ use rocket::serde::{Serialize, Deserialize};
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
 const IMAGE_ELEMENT_OFFSET: u32 = 155;
 const IMAGE_ELEMENT_HEIGHT: u32 = 80;
+const IMAGE_BASE_URL: &str = "https://info.trensfm.com/sapi/ivi_imagen?ubicacion=";
 const N_IMAGE_REGIONS: u8 = 7; // 7 regions per image => max 7 trains per image
 
 const HEADSIGNS: phf::Map<&str, &str> = phf::phf_map! {
@@ -211,9 +212,10 @@ fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Train> {
     results
 }
 
-pub fn retrieve(path: &str) -> Vec<Train> {
+pub fn retrieve(code: u8) -> Vec<Train> {
     let bytes = {
-        let response = ureq::get(path).call().unwrap();
+        let path = format!("{}{}", IMAGE_BASE_URL, code);
+        let response = ureq::get(&path).call().unwrap();
 
         let len: usize = response
             .header("Content-Length")

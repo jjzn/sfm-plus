@@ -3,9 +3,7 @@
 use rocket::serde::json::Json;
 use rocket::fairing::{Fairing, Info, Kind};
 
-mod train_info;
-
-const SFM_IMAGE_BASE_URL: &str = "https://info.trensfm.com/sapi/ivi_imagen";
+mod provider_sfm;
 
 struct Cors();
 
@@ -23,16 +21,14 @@ impl Fairing for Cors {
     }
 }
 
-#[get("/<code>")]
-fn info(code: u8) -> Json<Vec<train_info::Train>> {
-    let url = format!("{}?ubicacion={}", SFM_IMAGE_BASE_URL, code);
-
-    Json(train_info::retrieve(&url))
+#[get("/sfm/<code>")]
+fn info_sfm(code: u8) -> Json<Vec<provider_sfm::Train>> {
+    Json(provider_sfm::retrieve(code))
 }
 
 #[launch]
 async fn server() -> _ {
     rocket::build()
         .attach(Cors {})
-        .mount("/", routes![info])
+        .mount("/", routes![info_sfm])
 }

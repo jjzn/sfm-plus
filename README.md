@@ -49,3 +49,4 @@ invoking `cargo test`.
 
 - [ ] Only re-render the table after data has been fetched from the server
 - [ ] Reduce time spent on data extraction in the server
+- [ ] Add support for other transit agencies (TIB, EMT)
