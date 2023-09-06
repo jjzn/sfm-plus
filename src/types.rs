@@ -1,4 +1,5 @@
 use rocket::serde::{Serialize, Deserialize};
+use chrono::{Timelike, naive::NaiveTime};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -36,6 +37,13 @@ impl TryFrom<String> for TripTime {
         let minute: u8 = m.parse().map_err(|_| Self::Error::InvalidComponent)?;
 
         Ok(Self { hour, minute })
+    }
+}
+
+// TODO: implement From<T> for the generic chrono::Timelike trait
+impl From<NaiveTime> for TripTime {
+    fn from(val: NaiveTime) -> Self {
+        Self { hour: val.hour() as u8, minute: val.minute() as u8 }
     }
 }
 
