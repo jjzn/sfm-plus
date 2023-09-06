@@ -21,12 +21,15 @@ jobs:
           default: true
           override: true
 
-      - name: Install LLVM
-        run: |
-          sudo apt update
-          sudo apt install llvm
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: 15
 
       - name: Build binaries
+        env:
+          LIBCLANG_PATH: ./llvm/lib
+          LLVM_CONFIG_PATH: ./llvm/bin/llvm-config
         run: cargo build --release
 
       - name: Create release
