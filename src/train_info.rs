@@ -153,25 +153,10 @@ fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
     (mat_to_image(name_img), mat_to_image(rest_img))
 }
 
-pub fn retrieve(path: &str) -> Vec<Train> {
+fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Train> {
     let mut results = vec![];
 
-    let img = {
-        let response = ureq::get(path).call().unwrap();
-
-        let len: usize = response
-            .header("Content-Length")
-            .map(|s| s.parse().unwrap())
-            .unwrap_or(MAX_IMAGE_BYTES);
-
-        let mut bytes = Vec::with_capacity(len);
-        let _ = response
-            .into_reader()
-            .take(MAX_IMAGE_BYTES as u64)
-            .read_to_end(&mut bytes);
-
-        image::load_from_memory(&bytes).unwrap()
-    };
+    let img = image::load_from_memory(bytes).unwrap();
 
     for i in 0..7 {
         let (name_img, rest_img) = split_region(img.clone(), i);
@@ -222,4 +207,24 @@ pub fn retrieve(path: &str) -> Vec<Train> {
     }
 
     results
+}
+
+pub fn retrieve(path: &str) -> Vec<Train> {
+    let bytes = {
+        let response = ureq::get(path).call().unwrap();
+
+        let len: usize = response
+            .header("Content-Length")
+            .map(|s| s.parse().unwrap())
+            .unwrap_or(MAX_IMAGE_BYTES);
+
+        let mut bytes = Vec::with_capacity(len);
+        let _ = response
+            .into_reader()
+            .take(MAX_IMAGE_BYTES as u64)
+            .read_to_end(&mut bytes);
+ +        bytes
+    };
+
+    retrieve_from_bytes(&bytes)
 }
