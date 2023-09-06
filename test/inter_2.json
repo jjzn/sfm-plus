@@ -1,37 +1,37 @@
 [
     {
-        "title": "UIB",
-        "time": "09:15",
+        "headsign": "UIB",
+        "time": { "hour": 9, "minute": 15 },
         "track": 2
     },
     {
-        "title": "Manacor",
-        "time": "09:30",
+        "headsign": "Manacor",
+        "time": { "hour": 9, "minute": 30 },
         "track": 7
     },
     {
-        "title": "UIB",
-        "time": "09:35",
+        "headsign": "UIB",
+        "time": { "hour": 9, "minute": 35 },
         "track": 2
     },
     {
-        "title": "Sa Pobla",
-        "time": "09:50",
+        "headsign": "Sa Pobla",
+        "time": { "hour": 9, "minute": 50 },
         "track": 8
     },
     {
-        "title": "UIB",
-        "time": "09:55",
+        "headsign": "UIB",
+        "time": { "hour": 9, "minute": 55 },
         "track": 2
     },
     {
-        "title": "Manacor",
-        "time": "10:10",
+        "headsign": "Manacor",
+        "time": { "hour": 10, "minute": 10 },
         "track": 7
     },
     {
-        "title": "UIB",
-        "time": "10:15",
+        "headsign": "UIB",
+        "time": { "hour": 10, "minute": 15 },
         "track": 2
     }
 ]

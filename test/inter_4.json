@@ -1,37 +1,37 @@
 [
     {
-        "title": "Sa Pobla",
-        "time": "16:12",
+        "headsign": "Sa Pobla",
+        "time": { "hour": 16, "minute": 12 },
         "track": 4
     },
     {
-        "title": "UIB",
-        "time": "16:15",
+        "headsign": "UIB",
+        "time": { "hour": 16, "minute": 15 },
         "track": 2
     },
     {
-        "title": "Inca",
-        "time": "16:20",
+        "headsign": "Inca",
+        "time": { "hour": 16, "minute": 20 },
         "track": 9
     },
     {
-        "title": "Manacor",
-        "time": "16:30",
+        "headsign": "Manacor",
+        "time": { "hour": 16, "minute": 30 },
         "track": 7
     },
     {
-        "title": "UIB",
-        "time": "16:35",
+        "headsign": "UIB",
+        "time": { "hour": 16, "minute": 35 },
         "track": 2
     },
     {
-        "title": "Inca",
-        "time": "16:40",
+        "headsign": "Inca",
+        "time": { "hour": 16, "minute": 40 },
         "track": 9
     },
     {
-        "title": "Sa Pobla",
-        "time": "16:50",
+        "headsign": "Sa Pobla",
+        "time": { "hour": 16, "minute": 50 },
         "track": 8
     }
 ]

@@ -6,7 +6,7 @@ use regex::Regex;
 use std::io::Read;
 use std::convert::TryInto;
 
-use rocket::serde::Serialize;
+use rocket::serde::{Serialize, Deserialize};
 
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
 const IMAGE_ELEMENT_OFFSET: u32 = 155;
@@ -22,7 +22,7 @@ const HEADSIGNS: phf::Map<&str, &str> = phf::phf_map! {
     "palma" => "Palma"
 };
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct TrainTime {
     hour: u8,
@@ -61,7 +61,7 @@ impl TryFrom<String> for TrainTime {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Train {
     headsign: String,
@@ -223,8 +223,36 @@ pub fn retrieve(path: &str) -> Vec<Train> {
             .into_reader()
             .take(MAX_IMAGE_BYTES as u64)
             .read_to_end(&mut bytes);
- +        bytes
+
+        bytes
     };
 
     retrieve_from_bytes(&bytes)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::train_info::*;
+    use rocket::serde::json;
+    use std::path::PathBuf;
+
+    use rstest::rstest;
+    use pretty_assertions::assert_eq;
+
+    #[rstest]
+    fn compare_to_file(#[files("test/*.json")] path: PathBuf) {
+        let stem = path.file_stem().unwrap().to_str().unwrap();
+
+        let expected: Vec<Train> = {
+            let raw = std::fs::read(format!("test/{}.json", stem)).unwrap();
+            json::from_slice(&raw).unwrap()
+        };
+
+        let got = {
+            let raw = std::fs::read(format!("test/{}.jpg", stem)).unwrap();
+            retrieve_from_bytes(&raw)
+        };
+
+        assert_eq!(expected, got);
+    }
 }

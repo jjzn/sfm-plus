@@ -1,37 +1,37 @@
 [
     {
-        "title": "Palma",
-        "time": "07:59",
+        "headsign": "Palma",
+        "time": { "hour": 7, "minute": 59 },
         "track": 2
     },
     {
-        "title": "Palma",
-        "time": "09:59",
+        "headsign": "Palma",
+        "time": { "hour": 9, "minute": 59 },
         "track": 2
     },
     {
-        "title": "Inca",
-        "time": "13:44",
+        "headsign": "Inca",
+        "time": { "hour": 13, "minute": 44 },
         "track": 1
     },
     {
-        "title": "Sa Pobla",
-        "time": "13:50",
+        "headsign": "Sa Pobla",
+        "time": { "hour": 13, "minute": 50 },
         "track": 1
     },
     {
-        "title": "Palma",
-        "time": "13:59",
+        "headsign": "Palma",
+        "time": { "hour": 13, "minute": 59 },
         "track": 2
     },
     {
-        "title": "Inca",
-        "time": "14:04",
+        "headsign": "Inca",
+        "time": { "hour": 14, "minute": 4 },
         "track": 1
     },
     {
-        "title": "Palma",
-        "time": "14:08",
+        "headsign": "Palma",
+        "time": { "hour": 14, "minute": 8 },
         "track": 2
     }
 ]
