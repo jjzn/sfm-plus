@@ -1,0 +1,23 @@
+name: Build and create release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build binaries
+        run: cargo build
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags')
+        with:
+          draft: true
+          files: target/build/sfm-plus
