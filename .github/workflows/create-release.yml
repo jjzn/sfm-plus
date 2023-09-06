@@ -12,6 +12,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+
       - name: Build binaries
         run: cargo build
 
