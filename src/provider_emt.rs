@@ -1,9 +1,11 @@
 use rocket::serde::Deserialize;
 use chrono::{Duration, prelude::Local};
+use regex::Regex;
 
 use crate::types::*;
 
 const API_BASE_URL: &str = "https://api.mobipalma.mobi/1.2/paradas/";
+const API_TOKEN_URL: &str = "https://www.emtpalma.cat/ca/inici";
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -44,11 +46,24 @@ struct EmtApiResponse {
 }
 
 pub fn retrieve(code: u32) -> Vec<Trip> {
+    let page_text = ureq::get(API_TOKEN_URL)
+        .call().unwrap()
+        .into_string().unwrap();
+
+    let token_cap = Regex::new(r#"token:"([^"]+)""#)
+        .unwrap()
+        .captures(&page_text)
+        .unwrap();
+
+    let token = &token_cap[1];
+
     let mut res = vec![];
 
     let api_res: EmtApiResponse = {
         let path = format!("{}{}", API_BASE_URL, code);
-        let response = ureq::get(&path).call().unwrap();
+        let response = ureq::get(&path)
+            .set("Authorization", &format!("Bearer {}", token))
+            .call().unwrap();
 
         response.into_json().unwrap()
     };
