@@ -28,9 +28,12 @@ jobs:
 
       - name: Build binaries
         env:
-          LIBCLANG_PATH: ./llvm/lib
-          LLVM_CONFIG_PATH: ./llvm/bin/llvm-config
-        run: cargo build --release
+          LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+          LLVM_CONFIG_PATH: ${{ env.LLVM_PATH }}/bin/llvm-config
+        run: |
+          sudo ln -s ${{ env.LLVM_PATH }}/lib/libclang-15.so.1 /lib/x86_64-linux-gnu/libclang.so
+          echo "Searching for libclang.so in $LIBCLANG_PATH $LD_LIBRARY_PATH (llvm-config path is $LLVM_CONFIG_PATH)"
+          cargo build --release
 
       - name: Create release
         uses: softprops/action-gh-release@v1
