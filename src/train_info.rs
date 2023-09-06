@@ -11,8 +11,10 @@ use rocket::serde::Serialize;
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
 const IMAGE_ELEMENT_OFFSET: u32 = 155;
 const IMAGE_ELEMENT_HEIGHT: u32 = 80;
+const N_IMAGE_REGIONS: u8 = 7; // 7 regions per image => max 7 trains per image
 
 const HEADSIGNS: phf::Map<&str, &str> = phf::phf_map! {
+    "us" => "UIB",
     "ub" => "UIB",
     "uib" => "UIB",
     "inca" => "Inca",
@@ -153,8 +155,13 @@ fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
     (mat_to_image(name_img), mat_to_image(rest_img))
 }
 
+<<<<<<< Updated upstream
 pub fn retrieve(path: &str) -> Vec<Train> {
     let mut results = vec![];
+=======
+fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Train> {
+    let mut results = Vec::with_capacity(N_IMAGE_REGIONS as usize);
+>>>>>>> Stashed changes
 
     let img = {
         let response = ureq::get(path).call().unwrap();
@@ -173,8 +180,8 @@ pub fn retrieve(path: &str) -> Vec<Train> {
         image::load_from_memory(&bytes).unwrap()
     };
 
-    for i in 0..7 {
-        let (name_img, rest_img) = split_region(img.clone(), i);
+    for i in 0..N_IMAGE_REGIONS {
+        let (name_img, rest_img) = split_region(img.clone(), i as u32);
         let tess_args = rusty_tesseract::Args {
             config_variables: std::collections::HashMap::from([
                 ("tessedit_do_invert".into(), "0".into())
