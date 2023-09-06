@@ -1,37 +1,37 @@
 [
     {
-        "title": "Manacor",
-        "time": "14:11",
+        "headsign": "Manacor",
+        "time": { "hour": 14, "minute": 11 },
         "track": 1
     },
     {
-        "title": "Palma",
-        "time": "14:29",
+        "headsign": "Palma",
+        "time": { "hour": 14, "minute": 29 },
         "track": 2
     },
     {
-        "title": "Sa Pobla",
-        "time": "14:41",
+        "headsign": "Sa Pobla",
+        "time": { "hour": 14, "minute": 41 },
         "track": 1
     },
     {
-        "title": "Palma",
-        "time": "14:58",
+        "headsign": "Palma",
+        "time": { "hour": 14, "minute": 58 },
         "track": 2
     },
     {
-        "title": "Manacor",
-        "time": "15:11",
+        "headsign": "Manacor",
+        "time": { "hour": 15, "minute": 11 },
         "track": 1
     },
     {
-        "title": "Palma",
-        "time": "15:28",
+        "headsign": "Palma",
+        "time": { "hour": 15, "minute": 28 },
         "track": 2
     },
     {
-        "title": "Sa Pobla",
-        "time": "15:41",
+        "headsign": "Sa Pobla",
+        "time": { "hour": 15, "minute": 41 },
         "track": 1
     }
 ]

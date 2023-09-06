@@ -1,22 +1,22 @@
 [
     {
-        "title": "Palma",
-        "time": "16:15",
+        "headsign": "Palma",
+        "time": { "hour": 16, "minute": 15 },
         "track": 2
     },
     {
-        "title": "Palma",
-        "time": "16:35",
+        "headsign": "Palma",
+        "time": { "hour": 16, "minute": 35 },
         "track": 2
     },
     {
-        "title": "Palma",
-        "time": "16:55",
+        "headsign": "Palma",
+        "time": { "hour": 16, "minute": 55 },
         "track": 2
     },
     {
-        "title": "Palma",
-        "time": "17:15",
+        "headsign": "Palma",
+        "time": { "hour": 17, "minute": 15 },
         "track": 2
     }
 ]

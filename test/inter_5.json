@@ -1,17 +1,17 @@
 [
     {
-        "title": "Manacor",
-        "time": "21:10",
+        "headsign": "Manacor",
+        "time": { "hour": 21, "minute": 10 },
         "track": 7
     },
     {
-        "title": "Sa Pobla",
-        "time": "21:40",
+        "headsign": "Sa Pobla",
+        "time": { "hour": 21, "minute": 40 },
         "track": 8
     },
     {
-        "title": "Manacor",
-        "time": "22:10",
+        "headsign": "Manacor",
+        "time": { "hour": 22, "minute": 10 },
         "track": 7
     }
 ]
