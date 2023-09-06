@@ -23,14 +23,15 @@ Run these commands:
 
 ### The long story
 
-The server part, written in Rust, depends on some libraries, which are listed
-in `Cargo.toml` and will be automatically installed by Cargo. In addition, it
-requires a working installation of Tesseract 4 (known working version `4.1.1`)
-and of OpenCV.
+The dependencies for the Rust server are listed in `Cargo.toml`. However, the
+server also depends on some external libraries, both of which can be installed
+using your system's package manager:
+- Tesseract 4 (a known working version is `4.1.1`)
+- OpenCV
 
-After having installed all the system dependencies, you can build and start the
-server by running `cargo run`. Alternatively, you can directly invoke the build
-executable, which will be located somewhere in `target/`.
+After having installed these two external dependencies, you can use the usual
+Cargo commands to build and optionally start the server (`cargo build` and
+`cargo run`).
 
 If you plan on hosting an instance of SFM++, keep in mind this project is
 licensed under the [GNU Affero General Public License](https://choosealicense.com/licenses/agpl-3.0/),
@@ -41,8 +42,8 @@ more complete overview, visit the link above or read the [`LICENSE`](./LICENSE).
 
 Test data, which includes images and transcriptions in JSON format, are
 included in [`test/`](./test). The tests compare the output of the extractor
-with a manual transcription of the corresponding image. They can be run with
-the `test_runner.sh` Bash script.
+with a manual transcription of the corresponding image. They can be run by
+invoking `cargo test`.
 
 ## Roadmap and To-do
 
