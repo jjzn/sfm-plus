@@ -45,7 +45,7 @@ function Table({station}) {
 	useEffect(async () => {
 		setStatus('carregant...');
 
-		const res = await fetch(`http://127.0.0.1:8420/sfm/${station}`);
+		const res = await fetch(`http://127.0.0.1:8420/${station}`);
 		if (!res.ok) {
 			setStatus('(sense dades)');
 			return;
