@@ -6,7 +6,7 @@ use regex::Regex;
 use std::io::Read;
 use std::convert::TryInto;
 
-use rocket::serde::{Serialize, Deserialize};
+use crate::types::*;
 
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
 const IMAGE_ELEMENT_OFFSET: u32 = 155;
@@ -24,53 +24,6 @@ const HEADSIGNS: phf::Map<&str, &str> = phf::phf_map! {
     "obla" => "Sa Pobla",
     "palma" => "Palma"
 };
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct TrainTime {
-    hour: u8,
-    minute: u8
-}
-
-#[derive(Debug)]
-pub enum TimeError {
-    MissingSeparator,
-    InvalidComponent
-}
-
-impl std::error::Error for TimeError {}
-
-impl std::fmt::Display for TimeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Self::MissingSeparator => "Missing component separator (':')",
-            Self::InvalidComponent => "Invalid component (cannot be parsed as a number)"
-        })
-    }
-}
-
-impl TryFrom<String> for TrainTime {
-    type Error = TimeError;
-
-    fn try_from(val: String) -> Result<Self, Self::Error> {
-        let (h, m) = val
-            .split_once(':')
-            .ok_or(Self::Error::MissingSeparator)?;
-
-        let hour: u8 = h.parse().map_err(|_| Self::Error::InvalidComponent)?;
-        let minute: u8 = m.parse().map_err(|_| Self::Error::InvalidComponent)?;
-
-        Ok(Self { hour, minute })
-    }
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct Train {
-    headsign: String,
-    time: TrainTime,
-    track: u8
-}
 
 fn mat_to_image(mat: Mat) -> Image {
     let vec = mat.data_typed().unwrap().to_vec();
@@ -156,7 +109,7 @@ fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
     (mat_to_image(name_img), mat_to_image(rest_img))
 }
 
-fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Train> {
+fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
     let mut results = Vec::with_capacity(N_IMAGE_REGIONS as usize);
 
     let img = image::load_from_memory(bytes).unwrap();
@@ -202,7 +155,7 @@ fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Train> {
         };
 
         println!("{} {} {}", headsign, time, track);
-        results.push(Train {
+        results.push(Trip {
             headsign: headsign.to_string(),
             time: time.try_into().unwrap(),
             track: track.parse().unwrap()
@@ -212,7 +165,7 @@ fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Train> {
     results
 }
 
-pub fn retrieve(code: u8) -> Vec<Train> {
+pub fn retrieve(code: u8) -> Vec<Trip> {
     let bytes = {
         let path = format!("{}{}", IMAGE_BASE_URL, code);
         let response = ureq::get(&path).call().unwrap();
@@ -247,7 +200,7 @@ mod tests {
     fn compare_to_file(#[files("test/*.json")] path: PathBuf) {
         let stem = path.file_stem().unwrap().to_str().unwrap();
 
-        let expected: Vec<Train> = {
+        let expected: Vec<Trip> = {
             let raw = std::fs::read(format!("test/{}.json", stem)).unwrap();
             json::from_slice(&raw).unwrap()
         };
