@@ -90,12 +90,12 @@ fn split_region(mut img: Mat, idx: u32) -> (Image, Image) {
     let mut name_img = crop_image(
         &mut img,
         0, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
-        427, IMAGE_ELEMENT_HEIGHT);
+        342, IMAGE_ELEMENT_HEIGHT);
 
     let mut rest_img = crop_image(
         &mut img,
         342, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
-        427, IMAGE_ELEMENT_HEIGHT);
+        426, IMAGE_ELEMENT_HEIGHT);
 
     transform_image(&mut name_img);
     transform_image(&mut rest_img);
