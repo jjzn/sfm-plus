@@ -115,7 +115,7 @@ fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
 
     let ns: Vec<_> = (0..N_IMAGE_REGIONS).collect();
 
-    ns.par_iter().map(|&i| {
+    let mut res: Vec<_> = ns.par_iter().map(|&i| {
         let (name_img, rest_img) = split_region(img.clone(), i as u32);
         let tess_args = rusty_tesseract::Args {
             config_variables: std::collections::HashMap::from([
@@ -165,7 +165,11 @@ fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
         }
     })
         .filter(|x| *x != Default::default())
-        .collect()
+        .collect();
+
+    res.sort_unstable_by_key(|x| x.time.minutes());
+
+    res
 }
 
 pub fn retrieve(code: u8) -> Vec<Trip> {
