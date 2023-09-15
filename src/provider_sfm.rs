@@ -110,60 +110,63 @@ fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
     (mat_to_image(name_img), mat_to_image(rest_img))
 }
 
+fn process_region(img: image::DynamicImage, idx: u32) -> Trip {
+    let (name_img, rest_img) = split_region(img, idx);
+    let tess_args = rusty_tesseract::Args {
+        config_variables: std::collections::HashMap::from([
+            ("tessedit_do_invert".into(), "0".into())
+        ]),
+        lang: "eng".into(),
+        dpi: Some(300),
+        psm: Some(11),
+        oem: None
+    };
+
+    let name = rusty_tesseract::image_to_string(&name_img, &tess_args)
+        .unwrap().trim().to_lowercase().replace(" ", "");
+    let rest = rusty_tesseract::image_to_string(&rest_img, &tess_args)
+        .unwrap().trim().to_lowercase().replace(" ", "");
+
+    let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$").unwrap();
+    let Some(rest_match) = re.captures(&rest) else {
+        return Default::default(); };
+
+    println!(">>> {}", name);
+
+    let track = &rest_match[2];
+    let time = {
+        let mut aux = String::from(&rest_match[1])
+            .replace("°", ":")
+            .replace(".", ":");
+
+        if !aux.contains(':') {
+            aux.insert(aux.len() - 2, ':')
+        }
+
+        aux
+    };
+
+    let headsign = {
+        let Some(found) = HEADSIGNS.keys().find(|&key| name.contains(key)) else {
+            return Default::default(); };
+        HEADSIGNS.get(found).unwrap()
+    };
+
+    println!("{} {} {}", headsign, time, track);
+    Trip {
+        headsign: headsign.to_string(),
+        time: time.try_into().unwrap(),
+        track: track.parse().unwrap()
+    }
+}
+
 fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
     let img = image::load_from_memory(bytes).unwrap();
 
     let ns: Vec<_> = (0..N_IMAGE_REGIONS).collect();
 
-    let mut res: Vec<_> = ns.par_iter().map(|&i| {
-        let (name_img, rest_img) = split_region(img.clone(), i as u32);
-        let tess_args = rusty_tesseract::Args {
-            config_variables: std::collections::HashMap::from([
-                ("tessedit_do_invert".into(), "0".into())
-            ]),
-            lang: "eng".into(),
-            dpi: Some(300),
-            psm: Some(11),
-            oem: None
-        };
-
-        let name = rusty_tesseract::image_to_string(&name_img, &tess_args)
-            .unwrap().trim().to_lowercase().replace(" ", "");
-        let rest = rusty_tesseract::image_to_string(&rest_img, &tess_args)
-            .unwrap().trim().to_lowercase().replace(" ", "");
-
-        let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$").unwrap();
-        let Some(rest_match) = re.captures(&rest) else {
-            return Default::default(); };
-
-        println!(">>> {}", name);
-
-        let track = &rest_match[2];
-        let time = {
-            let mut aux = String::from(&rest_match[1])
-                .replace("°", ":")
-                .replace(".", ":");
-
-            if !aux.contains(':') {
-                aux.insert(aux.len() - 2, ':')
-            }
-
-            aux
-        };
-
-        let headsign = {
-            let Some(found) = HEADSIGNS.keys().find(|&key| name.contains(key)) else {
-                return Default::default(); };
-            HEADSIGNS.get(found).unwrap()
-        };
-
-        println!("{} {} {}", headsign, time, track);
-        Trip {
-            headsign: headsign.to_string(),
-            time: time.try_into().unwrap(),
-            track: track.parse().unwrap()
-        }
-    })
+    let mut res: Vec<_> = ns.par_iter()
+        .map(|&i| process_region(img.clone(), i as u32))
         .filter(|x| *x != Default::default())
         .collect();
 
