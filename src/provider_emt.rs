@@ -36,7 +36,7 @@ impl From<EmtApiItem> for Trip {
 #[serde(crate = "rocket::serde")]
 struct EmtApiRoute {
     vh_first: EmtApiItem,
-    vh_second: EmtApiItem
+    vh_second: Option<EmtApiItem>
 }
 
 #[derive(Deserialize)]
@@ -70,7 +70,10 @@ pub fn retrieve(code: u32) -> Vec<Trip> {
 
     for route in api_res.estimaciones {
         res.push(route.vh_first.into());
-        res.push(route.vh_second.into());
+
+        if let Some(item) = route.vh_second {
+            res.push(item.into())
+        }
     }
 
     res
