@@ -7,6 +7,8 @@ use regex::Regex;
 use std::io::Read;
 use std::convert::TryInto;
 
+use image::GenericImageView;
+
 use crate::types::*;
 
 const MAX_IMAGE_BYTES: usize = 10_000_000; // 10 MB
@@ -75,25 +77,16 @@ fn transform_image(img: &mut Mat) {
         &img.clone(), img, 12, 12, 12, 12, BORDER_CONSTANT, 255.into());
 }
 
-fn crop_image(img: &mut image::DynamicImage, x: u32, y: u32, w: u32, h: u32) -> Mat {
-    let imbuf = image::imageops::crop(img, x, y, w, h).to_image();
-    let (cols, rows) = imbuf.dimensions();
-
-    let pixels: Vec<VecN<u8, 4>> = imbuf
-        .into_raw()
-        .chunks(4)
-        .map(|x| x.try_into().unwrap())
-        .map(|x: [u8; 4]| x.into())
-        .collect();
-
-    Mat::from_slice_rows_cols(
-            &pixels,
-            rows as usize,
-            cols as usize)
-        .unwrap()
+fn crop_image(img: &mut Mat, x: u32, y: u32, w: u32, h: u32) -> Mat {
+    Mat::roi(img, Rect {
+        x: x as i32,
+        y: y as i32,
+        width: w as i32,
+        height: h as i32
+    }).unwrap()
 }
 
-fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
+fn split_region(mut img: Mat, idx: u32) -> (Image, Image) {
     let mut name_img = crop_image(
         &mut img,
         0, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
@@ -110,7 +103,24 @@ fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
     (mat_to_image(name_img), mat_to_image(rest_img))
 }
 
-fn process_region(img: image::DynamicImage, idx: u32) -> Trip {
+fn process_region(img_orig: image::DynamicImage, idx: u32) -> Trip {
+    let img = {
+        let (rows, cols) = img_orig.dimensions();
+
+        let pixels: Vec<VecN<u8, 4>> = img_orig
+            .into_rgba8()
+            .chunks(4)
+            .map(|x| x.try_into().unwrap())
+            .map(|x: [u8; 4]| x.into())
+            .collect();
+
+        Mat::from_slice_rows_cols(
+                &pixels,
+                rows as usize,
+                cols as usize)
+            .unwrap()
+    };
+
     let (name_img, rest_img) = split_region(img, idx);
     let tess_args = rusty_tesseract::Args {
         config_variables: std::collections::HashMap::from([
