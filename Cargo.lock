@@ -1691,6 +1691,7 @@ dependencies = [
  "opencv",
  "phf",
  "pretty_assertions",
+ "rayon",
  "regex",
  "rocket",
  "rstest",

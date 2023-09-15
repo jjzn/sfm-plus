@@ -2,6 +2,7 @@ use rusty_tesseract::Image;
 use opencv::imgproc::*;
 use opencv::core::*;
 use opencv::prelude::{MatTraitConst, MatTraitConstManual};
+use rayon::prelude::*;
 use regex::Regex;
 use std::io::Read;
 use std::convert::TryInto;
@@ -110,11 +111,11 @@ fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
 }
 
 fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
-    let mut results = Vec::with_capacity(N_IMAGE_REGIONS as usize);
-
     let img = image::load_from_memory(bytes).unwrap();
 
-    for i in 0..N_IMAGE_REGIONS {
+    let ns: Vec<_> = (0..N_IMAGE_REGIONS).collect();
+
+    ns.par_iter().map(|&i| {
         let (name_img, rest_img) = split_region(img.clone(), i as u32);
         let tess_args = rusty_tesseract::Args {
             config_variables: std::collections::HashMap::from([
@@ -132,7 +133,8 @@ fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
             .unwrap().trim().to_lowercase().replace(" ", "");
 
         let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$").unwrap();
-        let Some(rest_match) = re.captures(&rest) else { continue };
+        let Some(rest_match) = re.captures(&rest) else {
+            return Default::default(); };
 
         println!(">>> {}", name);
 
@@ -150,19 +152,20 @@ fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
         };
 
         let headsign = {
-            let Some(found) = HEADSIGNS.keys().find(|&key| name.contains(key)) else { continue };
+            let Some(found) = HEADSIGNS.keys().find(|&key| name.contains(key)) else {
+                return Default::default(); };
             HEADSIGNS.get(found).unwrap()
         };
 
         println!("{} {} {}", headsign, time, track);
-        results.push(Trip {
+        Trip {
             headsign: headsign.to_string(),
             time: time.try_into().unwrap(),
             track: track.parse().unwrap()
-        });
-    }
-
-    results
+        }
+    })
+        .filter(|x| *x != Default::default())
+        .collect()
 }
 
 pub fn retrieve(code: u8) -> Vec<Trip> {
