@@ -209,7 +209,9 @@ pub fn retrieve(code: u8) -> Vec<Trip> {
 
 #[cfg(test)]
 mod tests {
-    use crate::train_info::*;
+    use crate::types::*;
+    use crate::provider_sfm::retrieve_from_bytes;
+
     use rocket::serde::json;
     use std::path::PathBuf;
 
