@@ -2,9 +2,12 @@ use rusty_tesseract::Image;
 use opencv::imgproc::*;
 use opencv::core::*;
 use opencv::prelude::{MatTraitConst, MatTraitConstManual};
+use rayon::prelude::*;
 use regex::Regex;
 use std::io::Read;
 use std::convert::TryInto;
+
+use image::GenericImageView;
 
 use crate::types::*;
 
@@ -74,34 +77,25 @@ fn transform_image(img: &mut Mat) {
         &img.clone(), img, 12, 12, 12, 12, BORDER_CONSTANT, 255.into());
 }
 
-fn crop_image(img: &mut image::DynamicImage, x: u32, y: u32, w: u32, h: u32) -> Mat {
-    let imbuf = image::imageops::crop(img, x, y, w, h).to_image();
-    let (cols, rows) = imbuf.dimensions();
-
-    let pixels: Vec<VecN<u8, 4>> = imbuf
-        .into_raw()
-        .chunks(4)
-        .map(|x| x.try_into().unwrap())
-        .map(|x: [u8; 4]| x.into())
-        .collect();
-
-    Mat::from_slice_rows_cols(
-            &pixels,
-            rows as usize,
-            cols as usize)
-        .unwrap()
+fn crop_image(img: &mut Mat, x: u32, y: u32, w: u32, h: u32) -> Mat {
+    Mat::roi(img, Rect {
+        x: x as i32,
+        y: y as i32,
+        width: w as i32,
+        height: h as i32
+    }).unwrap()
 }
 
-fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
+fn split_region(mut img: Mat, idx: u32) -> (Image, Image) {
     let mut name_img = crop_image(
         &mut img,
         0, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
-        427, IMAGE_ELEMENT_HEIGHT);
+        342, IMAGE_ELEMENT_HEIGHT);
 
     let mut rest_img = crop_image(
         &mut img,
         342, IMAGE_ELEMENT_OFFSET + idx * IMAGE_ELEMENT_HEIGHT,
-        427, IMAGE_ELEMENT_HEIGHT);
+        426, IMAGE_ELEMENT_HEIGHT);
 
     transform_image(&mut name_img);
     transform_image(&mut rest_img);
@@ -109,60 +103,86 @@ fn split_region(mut img: image::DynamicImage, idx: u32) -> (Image, Image) {
     (mat_to_image(name_img), mat_to_image(rest_img))
 }
 
-fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
-    let mut results = Vec::with_capacity(N_IMAGE_REGIONS as usize);
+fn process_region(img_orig: image::DynamicImage, idx: u32) -> Trip {
+    let img = {
+        let (cols, rows) = img_orig.dimensions();
 
+        let pixels: Vec<VecN<u8, 4>> = img_orig
+            .into_rgba8()
+            .chunks(4)
+            .map(|x| x.try_into().unwrap())
+            .map(|x: [u8; 4]| x.into())
+            .collect();
+
+        Mat::from_slice_rows_cols(
+                &pixels,
+                rows as usize,
+                cols as usize)
+            .unwrap()
+    };
+
+    let (name_img, rest_img) = split_region(img, idx);
+    let tess_args = rusty_tesseract::Args {
+        config_variables: std::collections::HashMap::from([
+            ("tessedit_do_invert".into(), "0".into())
+        ]),
+        lang: "eng".into(),
+        dpi: Some(300),
+        psm: Some(11),
+        oem: None
+    };
+
+    let name = rusty_tesseract::image_to_string(&name_img, &tess_args)
+        .unwrap().trim().to_lowercase().replace(" ", "");
+    let rest = rusty_tesseract::image_to_string(&rest_img, &tess_args)
+        .unwrap().trim().to_lowercase().replace(" ", "");
+
+    let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).*(\d+)$").unwrap();
+    let Some(rest_match) = re.captures(&rest) else {
+        return Default::default(); };
+
+    println!(">>> {}", name);
+
+    let track = &rest_match[2];
+    let time = {
+        let mut aux = String::from(&rest_match[1])
+            .replace("°", ":")
+            .replace(".", ":");
+
+        if !aux.contains(':') {
+            aux.insert(aux.len() - 2, ':')
+        }
+
+        aux
+    };
+
+    let headsign = {
+        let Some(found) = HEADSIGNS.keys().find(|&key| name.contains(key)) else {
+            return Default::default(); };
+        HEADSIGNS.get(found).unwrap()
+    };
+
+    println!("{} {} {}", headsign, time, track);
+    Trip {
+        headsign: headsign.to_string(),
+        time: time.try_into().unwrap(),
+        track: track.parse().unwrap()
+    }
+}
+
+fn retrieve_from_bytes(bytes: &[u8]) -> Vec<Trip> {
     let img = image::load_from_memory(bytes).unwrap();
 
-    for i in 0..N_IMAGE_REGIONS {
-        let (name_img, rest_img) = split_region(img.clone(), i as u32);
-        let tess_args = rusty_tesseract::Args {
-            config_variables: std::collections::HashMap::from([
-                ("tessedit_do_invert".into(), "0".into())
-            ]),
-            lang: "eng".into(),
-            dpi: Some(300),
-            psm: Some(11),
-            oem: None
-        };
+    let ns: Vec<_> = (0..N_IMAGE_REGIONS).collect();
 
-        let name = rusty_tesseract::image_to_string(&name_img, &tess_args)
-            .unwrap().trim().to_lowercase().replace(" ", "");
-        let rest = rusty_tesseract::image_to_string(&rest_img, &tess_args)
-            .unwrap().trim().to_lowercase().replace(" ", "");
+    let mut res: Vec<_> = ns.par_iter()
+        .map(|&i| process_region(img.clone(), i as u32))
+        .filter(|x| *x != Default::default())
+        .collect();
 
-        let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$").unwrap();
-        let Some(rest_match) = re.captures(&rest) else { continue };
+    res.sort_unstable_by_key(|x| x.time.minutes());
 
-        println!(">>> {}", name);
-
-        let track = &rest_match[2];
-        let time = {
-            let mut aux = String::from(&rest_match[1])
-                .replace("°", ":")
-                .replace(".", ":");
-
-            if !aux.contains(':') {
-                aux.insert(aux.len() - 2, ':')
-            }
-
-            aux
-        };
-
-        let headsign = {
-            let Some(found) = HEADSIGNS.keys().find(|&key| name.contains(key)) else { continue };
-            HEADSIGNS.get(found).unwrap()
-        };
-
-        println!("{} {} {}", headsign, time, track);
-        results.push(Trip {
-            headsign: headsign.to_string(),
-            time: time.try_into().unwrap(),
-            track: track.parse().unwrap()
-        });
-    }
-
-    results
+    res
 }
 
 pub fn retrieve(code: u8) -> Vec<Trip> {
@@ -189,7 +209,9 @@ pub fn retrieve(code: u8) -> Vec<Trip> {
 
 #[cfg(test)]
 mod tests {
-    use crate::train_info::*;
+    use crate::types::*;
+    use crate::provider_sfm::retrieve_from_bytes;
+
     use rocket::serde::json;
     use std::path::PathBuf;
 
