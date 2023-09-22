@@ -31,7 +31,7 @@ fn info_sfm(code: u8) -> Json<Vec<Trip>> {
 }
 
 #[get("/emt/<code>")]
-fn info_emt(code: u32) -> Json<Vec<Trip>> {
+fn info_emt(code: u32) -> Json<Result<Vec<Trip>, provider_emt::Error>> {
     Json(provider_emt::retrieve(code))
 }
 
