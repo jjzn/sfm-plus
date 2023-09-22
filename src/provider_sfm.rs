@@ -105,7 +105,7 @@ fn split_region(mut img: Mat, idx: u32) -> (Image, Image) {
 
 fn process_region(img_orig: image::DynamicImage, idx: u32) -> Trip {
     let img = {
-        let (rows, cols) = img_orig.dimensions();
+        let (cols, rows) = img_orig.dimensions();
 
         let pixels: Vec<VecN<u8, 4>> = img_orig
             .into_rgba8()
@@ -137,7 +137,7 @@ fn process_region(img_orig: image::DynamicImage, idx: u32) -> Trip {
     let rest = rusty_tesseract::image_to_string(&rest_img, &tess_args)
         .unwrap().trim().to_lowercase().replace(" ", "");
 
-    let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).+(\d+)$").unwrap();
+    let re = Regex::new(r"(?ms)(\d\d?[:°\.]?\d\d).*(\d+)$").unwrap();
     let Some(rest_match) = re.captures(&rest) else {
         return Default::default(); };
 
