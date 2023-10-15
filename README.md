@@ -28,6 +28,10 @@ server also depends on some external libraries, both of which can be installed
 using your system's package manager:
 - Tesseract 4 (a known working version is `4.1.1`)
 - OpenCV
+- clang and libclang (`libclang-dev` for Debian and derivatives)
+
+Please refer to [this page](https://github.com/twistedfall/opencv-rust#getting-opencv)
+for further instructions regarding how to install system dependencies.
 
 After having installed these two external dependencies, you can use the usual
 Cargo commands to build and optionally start the server (`cargo build` and
