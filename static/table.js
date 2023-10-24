@@ -37,7 +37,7 @@ function Clock({updated, setStale}) {
 	return html`<caption class="clock">${clock} (actualitzat ${hours}:${mins})</caption>`;
 }
 
-function Table({station}) {
+function Table({stop}) {
 	const [data, setData] = useState([]);
 	const [status, setStatus] = useState('ok');
 	const [stale, setStale] = useState(false);
@@ -45,7 +45,7 @@ function Table({station}) {
 	useEffect(async () => {
 		setStatus('carregant...');
 
-		const res = await fetch(`http://127.0.0.1:8420/${station}`);
+		const res = await fetch(`http://127.0.0.1:8420/${stop}`);
 		if (!res.ok) {
 			setStatus('(sense dades)');
 			return;
@@ -54,7 +54,7 @@ function Table({station}) {
 		const json = await res.json();
 		setData(json);
 		setStatus(json.length ? 'ok' : '(cap tren)');
-	}, [station, stale]);
+	}, [stop, stale]);
 
 	useEffect(() => {}, [stale]);
 
