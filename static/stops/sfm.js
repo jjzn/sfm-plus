@@ -1,147 +1,147 @@
 export default {
-  "Intermodal": {
+  "sfm/1": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/1"
+    "name": "Intermodal"
   },
-  "Jacint Verdaguer": {
+  "sfm/2": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/2"
+    "name": "Jacint Verdaguer"
   },
-  "Son Costa": {
+  "sfm/3": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/3"
+    "name": "Son Costa"
   },
-  "Son Fuster Vell": {
+  "sfm/54": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/54"
+    "name": "Son Fuster Vell"
   },
-  "Son Castelló": {
+  "sfm/55": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/55"
+    "name": "Son Castelló"
   },
-  "Gran Via Asima": {
+  "sfm/56": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/56"
+    "name": "Gran Via Asima"
   },
-  "Camí dels Reis": {
+  "sfm/57": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/57"
+    "name": "Camí dels Reis"
   },
-  "Son Sardina": {
+  "sfm/58": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/58"
+    "name": "Son Sardina"
   },
-  "UIB": {
+  "sfm/51": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/51"
+    "name": "UIB"
   },
-  "Son Fuster": {
+  "sfm/4": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/4"
+    "name": "Son Fuster"
   },
-  "Son Cladera": {
+  "sfm/30": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/30"
+    "name": "Son Cladera"
   },
-  "Verge de Lluc": {
+  "sfm/6": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/6"
+    "name": "Verge de Lluc"
   },
-  "Pont d'Inca": {
+  "sfm/7": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/7"
+    "name": "Pont d'Inca"
   },
-  "Pont d'Inca Nou": {
+  "sfm/8": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/8"
+    "name": "Pont d'Inca Nou"
   },
-  "Polígon de Marratxí": {
+  "sfm/9": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/9"
+    "name": "Polígon de Marratxí"
   },
-  "Marratxí": {
+  "sfm/10": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/10"
+    "name": "Marratxí"
   },
-  "Es Caülls": {
+  "sfm/11": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/11"
+    "name": "Es Caülls"
   },
-  "Santa Maria": {
+  "sfm/12": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/12"
+    "name": "Santa Maria"
   },
-  "Consell - Alaró": {
+  "sfm/13": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/13"
+    "name": "Consell - Alaró"
   },
-  "Binissalem": {
+  "sfm/14": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/14"
+    "name": "Binissalem"
   },
-  "Lloseta": {
+  "sfm/15": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/15"
+    "name": "Lloseta"
   },
-  "Inca": {
+  "sfm/16": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/16"
+    "name": "Inca"
   },
-  "Enllaç": {
+  "sfm/17": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/17"
+    "name": "Enllaç"
   },
-  "Llubí": {
+  "sfm/18": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/18"
+    "name": "Llubí"
   },
-  "Muro": {
+  "sfm/19": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/19"
+    "name": "Muro"
   },
-  "Sa Pobla": {
+  "sfm/20": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/20"
+    "name": "Sa Pobla"
   },
-  "Sineu": {
+  "sfm/21": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/21"
+    "name": "Sineu"
   },
-  "Petra": {
+  "sfm/23": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/23"
+    "name": "Petra"
   },
-  "Manacor": {
+  "sfm/24": {
     "lat": 0,
     "lon": 0,
-    "code": "sfm/24"
+    "name": "Manacor"
   }
 };

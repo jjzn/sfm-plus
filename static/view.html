@@ -30,7 +30,7 @@
 				};
 
 				const initial = localStorage.getItem('selected-stop-code') || 1;
-				const rows = Object.values(stops).map(([k, v]) => html`<option value="${v.code}" selected=${v.code == initial}>${k}</option>`);
+				const rows = stops.map(([k, v]) => html`<option value="${k}" selected=${k == initial}>${v.name}</option>`);
 				return html`
 					<label for="stop-select">Aturada</label>
 					<select id="stop-select" onchange=${set}>${rows}</select>`;
@@ -38,11 +38,11 @@
 
 			function App() {
 				const [stopCode, setStopCode] = useState(localStorage.getItem('selected-stop-code') || 1);
-				const rev_lookup = val => Object.values(stops).find(([k, v]) => v.code == val);
+				const rev_lookup = val => stops.find(([k, v]) => k == val);
 
 				return html`
 					<${StopSelector} setter=${setStopCode} />
-					<h1>${rev_lookup(stopCode)[0]}</h1>
+					<h1>${rev_lookup(stopCode)[1].name}</h1>
 					<${Table} stop=${stopCode} />`;
 			}
 

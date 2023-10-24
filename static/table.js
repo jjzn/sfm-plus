@@ -53,7 +53,7 @@ function Table({stop}) {
 
 		const json = await res.json();
 		setData(json);
-		setStatus(json.length ? 'ok' : '(cap tren)');
+		setStatus(json.length ? 'ok' : '(cap vehicle)');
 	}, [stop, stale]);
 
 	useEffect(() => {}, [stale]);
@@ -61,7 +61,7 @@ function Table({stop}) {
 	const rows = data.map(({headsign, time, track}) => html`
 		<tr>
 			<td>${headsign}</td>
-			<td>${time.hour}:${time.minute}</td>
+			<td>${time.hour}:${time.minute.toString().padStart(2, '0')}</td>
 			<td>${track}</td>
 		</tr>`);
 
