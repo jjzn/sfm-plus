@@ -20,6 +20,8 @@
 			import stops from './stops.js';
 			import Table from './table.js';
 
+			const DEFAULT_STOP = 'sfm/1'; // Intermodal station
+
 			const html = htm.bind(h);
 
 			function StopSelector({setter}) {
@@ -29,7 +31,7 @@
 					setter(val);
 				};
 
-				const initial = localStorage.getItem('selected-stop-code') || 1;
+				const initial = localStorage.getItem('selected-stop-code') || DEFAULT_STOP;
 				const rows = stops.map(([k, v]) => html`<option value="${k}" selected=${k == initial}>${v.name}</option>`);
 				return html`
 					<label for="stop-select">Aturada</label>
@@ -37,7 +39,7 @@
 			}
 
 			function App() {
-				const [stopCode, setStopCode] = useState(localStorage.getItem('selected-stop-code') || 1);
+				const [stopCode, setStopCode] = useState(localStorage.getItem('selected-stop-code') || DEFAULT_STOP);
 				const rev_lookup = val => stops.find(([k, v]) => k == val);
 
 				return html`

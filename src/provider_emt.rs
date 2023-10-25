@@ -30,8 +30,8 @@ impl From<EmtApiItem> for Trip {
         Self {
             headsign: val.destino,
             time: time.into(),
-            track: 0,
-            line: val.line
+            track: None,
+            line: Some(val.line)
         }
     }
 }

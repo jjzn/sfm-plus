@@ -58,25 +58,25 @@ function Table({stop}) {
 
 	useEffect(() => {}, [stale]);
 
-	const rows = data.map(({headsign, time, track}) => html`
+	const rows = data.map(({headsign, time, track, line}) => html`
 		<tr>
 			<td>${headsign}</td>
 			<td>${time.hour}:${time.minute.toString().padStart(2, '0')}</td>
-			<td>${track}</td>
+			<td>${track || ''} ${line || ''}</td>
 		</tr>`);
 
 	rows.unshift(html`
 		<tr>
 			<th>Destinació</th>
 			<th>Hora</th>
-			<th>Via</th>
+			<th>Via/línia</th>
 		</tr>
 	`);
 
 	const fallback = html`<tr>
 		<th>Destinació</th>
 			<th>Hora</th>
-			<th>Via</th>
+			<th>Via/línia</th>
 		</tr>
 		<tr>
 			<td>${status}</td>

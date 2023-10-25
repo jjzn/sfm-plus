@@ -166,8 +166,8 @@ fn process_region(img_orig: image::DynamicImage, idx: u32) -> Trip {
     Trip {
         headsign: headsign.to_string(),
         time: time.try_into().unwrap(),
-        track: track.parse().unwrap(),
-        line: "".into() // TODO: convert to Option<String>
+        track: track.parse().ok(),
+        line: None
     }
 }
 
