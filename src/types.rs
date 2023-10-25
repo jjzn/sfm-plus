@@ -58,5 +58,6 @@ impl From<NaiveTime> for TripTime {
 pub struct Trip {
     pub headsign: String,
     pub time: TripTime,
-    pub track: u8
+    pub track: u8,
+    pub line: String
 }

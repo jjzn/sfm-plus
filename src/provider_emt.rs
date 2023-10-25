@@ -12,7 +12,10 @@ const API_TOKEN_URL: &str = "https://www.emtpalma.cat/ca/inici";
 struct EmtApiItem {
     destino: String,
     seconds: u32,
-    llegando: bool
+    llegando: bool,
+
+    #[serde(skip)]
+    line: String
 }
 
 impl From<EmtApiItem> for Trip {
@@ -27,7 +30,8 @@ impl From<EmtApiItem> for Trip {
         Self {
             headsign: val.destino,
             time: time.into(),
-            track: 0
+            track: 0,
+            line: val.line
         }
     }
 }
@@ -35,6 +39,7 @@ impl From<EmtApiItem> for Trip {
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 struct EmtApiRoute {
+    line: String,
     vh_first: EmtApiItem,
     vh_second: Option<EmtApiItem>
 }
@@ -68,14 +73,16 @@ pub fn retrieve(code: u32) -> Vec<Trip> {
         response.into_json().unwrap()
     };
 
-    for route in api_res.estimaciones {
+    for mut route in api_res.estimaciones {
+        route.vh_first.line = route.line.clone();
         res.push(route.vh_first.into());
 
-        if let Some(item) = route.vh_second {
+        if let Some(mut item) = route.vh_second {
+            item.line = route.line;
             res.push(item.into())
         }
     }
 
-	res.sort_unstable_by_key(|x: &Trip| x.time);
+    res.sort_unstable_by_key(|x: &Trip| x.time);
     res
 }
