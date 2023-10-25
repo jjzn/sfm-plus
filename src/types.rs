@@ -1,7 +1,7 @@
 use rocket::serde::{Serialize, Deserialize};
 use chrono::{Timelike, naive::NaiveTime};
 
-#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct TripTime {
     pub hour: u8,

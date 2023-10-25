@@ -76,5 +76,6 @@ pub fn retrieve(code: u32) -> Vec<Trip> {
         }
     }
 
+	res.sort_unstable_by_key(|x: &Trip| x.time);
     res
 }
