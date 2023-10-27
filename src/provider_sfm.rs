@@ -21,6 +21,7 @@ const HEADSIGNS: phf::Map<&str, &str> = phf::phf_map! {
     "us" => "UIB",
     "ub" => "UIB",
     "uib" => "UIB",
+    "vib" => "UIB",
     "inca" => "Inca",
     "man" => "Manacor",
     "sapo" => "Sa Pobla",
