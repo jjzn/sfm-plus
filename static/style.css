@@ -32,9 +32,13 @@ body {
 
 table { border-collapse: collapse; }
 tr { border: 1px solid currentcolor; }
-td, th { padding: .5em; }
 :is(td, th) + :is(td, th) { padding-left: 2em; }
+td, th {
+	padding: .5em;
+	text-align: left;
+}
 
+td:last-of-type, th:last-of-type { text-align: center; }
 table > :not(caption) { width: 100%; }
 
 .clock {
@@ -60,6 +64,11 @@ select {
 	background-position: right;
 
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgOTYgOTYwIDk2MCIgd2lkdGg9IjI0Ij48cGF0aCBkPSJNNDgwIDc0MiAyMDggNDcwbDg4LTg4IDE4NCAxODQgMTg0LTE4NCA4OCA4OC0yNzIgMjcyWiIvPjwvc3ZnPgo=);
+}
+
+select {
+	max-width: 100%;
+	white-space: break-spaces;
 }
 
 label {
