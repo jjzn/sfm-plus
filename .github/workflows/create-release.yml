@@ -1,0 +1,59 @@
+name: Build and create release
+
+on:
+  workflow_dispatch:
+
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          default: true
+          override: true
+
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: 15
+
+      - name: Install OpenCV
+        run: |
+          sudo apt update
+          sudo apt install libopencv-dev
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build binaries
+        env:
+          LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+          LLVM_CONFIG_PATH: ${{ env.LLVM_PATH }}/bin/llvm-config
+        run: |
+          sudo ln -s ${{ env.LLVM_PATH }}/lib/libclang-15.so.1 /lib/x86_64-linux-gnu/libclang.so
+          echo "Searching for libclang.so in $LIBCLANG_PATH $LD_LIBRARY_PATH (llvm-config path is $LLVM_CONFIG_PATH)"
+          cargo build --release
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags')
+        with:
+          draft: true
+          files: target/release/sfm-plus

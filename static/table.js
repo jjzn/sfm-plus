@@ -37,7 +37,7 @@ function Clock({updated, setStale}) {
 	return html`<caption class="clock">${clock} (actualitzat ${hours}:${mins})</caption>`;
 }
 
-function Table({station}) {
+function Table({stop}) {
 	const [data, setData] = useState([]);
 	const [status, setStatus] = useState('ok');
 	const [stale, setStale] = useState(false);
@@ -45,7 +45,7 @@ function Table({station}) {
 	useEffect(async () => {
 		setStatus('carregant...');
 
-		const res = await fetch(`http://127.0.0.1:8420/${station}`);
+		const res = await fetch(`http://127.0.0.1:8420/${stop}`);
 		if (!res.ok) {
 			setStatus('(sense dades)');
 			return;
@@ -53,30 +53,30 @@ function Table({station}) {
 
 		const json = await res.json();
 		setData(json);
-		setStatus(json.length ? 'ok' : '(cap tren)');
-	}, [station, stale]);
+		setStatus(json.length ? 'ok' : '(cap vehicle)');
+	}, [stop, stale]);
 
 	useEffect(() => {}, [stale]);
 
-	const rows = data.map(({headsign, time, track}) => html`
+	const rows = data.map(({headsign, time, track, line}) => html`
 		<tr>
 			<td>${headsign}</td>
-			<td>${time.hour}:${time.minute}</td>
-			<td>${track}</td>
+			<td>${time.hour}:${time.minute.toString().padStart(2, '0')}</td>
+			<td>${track || ''} ${line || ''}</td>
 		</tr>`);
 
 	rows.unshift(html`
 		<tr>
 			<th>Destinació</th>
 			<th>Hora</th>
-			<th>Via</th>
+			<th>Via/línia</th>
 		</tr>
 	`);
 
 	const fallback = html`<tr>
 		<th>Destinació</th>
 			<th>Hora</th>
-			<th>Via</th>
+			<th>Via/línia</th>
 		</tr>
 		<tr>
 			<td>${status}</td>

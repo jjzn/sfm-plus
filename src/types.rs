@@ -1,11 +1,17 @@
 use rocket::serde::{Serialize, Deserialize};
 use chrono::{Timelike, naive::NaiveTime};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct TripTime {
     pub hour: u8,
     pub minute: u8
+}
+
+impl TripTime {
+    pub fn minutes(&self) -> u16 {
+        self.hour as u16 * 60 + self.minute as u16
+    }
 }
 
 #[derive(Debug)]
@@ -47,10 +53,11 @@ impl From<NaiveTime> for TripTime {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Trip {
     pub headsign: String,
     pub time: TripTime,
-    pub track: u8
+    pub track: Option<u8>,
+    pub line: Option<String>
 }
