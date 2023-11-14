@@ -39,12 +39,10 @@ function Clock({updated, setStale}) {
 
 function Table({stop}) {
 	const [data, setData] = useState([]);
-	const [status, setStatus] = useState('ok');
+	const [status, setStatus] = useState('(cap vehicle)');
 	const [stale, setStale] = useState(false);
 
 	useEffect(async () => {
-		setStatus('carregant...');
-
 		const res = await fetch(`http://127.0.0.1:8420/${stop}`);
 		if (!res.ok) {
 			setStatus('(sense dades)');
@@ -55,8 +53,6 @@ function Table({stop}) {
 		setData(json);
 		setStatus(json.length ? 'ok' : '(cap vehicle)');
 	}, [stop, stale]);
-
-	useEffect(() => {}, [stale]);
 
 	const rows = data.map(({headsign, time, track, line}) => html`
 		<tr>
@@ -73,8 +69,9 @@ function Table({stop}) {
 		</tr>
 	`);
 
-	const fallback = html`<tr>
-		<th>Destinació</th>
+	const fallback = html`
+		<tr>
+			<th>Destinació</th>
 			<th>Hora</th>
 			<th>Via/línia</th>
 		</tr>
