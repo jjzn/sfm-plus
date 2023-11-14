@@ -1,4 +1,4 @@
-use rocket::serde::Deserialize;
+use rocket::serde::{Serialize, Deserialize};
 use chrono::{Duration, prelude::Local};
 use regex::Regex;
 
@@ -50,15 +50,52 @@ struct EmtApiResponse {
     estimaciones: Vec<EmtApiRoute>
 }
 
-pub fn retrieve(code: u32) -> Vec<Trip> {
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
+pub enum Error {
+    RemoteError(u16),
+    NetworkError,
+    MissingToken,
+    IOError
+}
+
+impl std::error::Error for Error {}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::RemoteError(code) => write!(f, "Remote server error, status code {}", code),
+            Self::NetworkError => write!(f, "Network error"),
+            Self::MissingToken => write!(f, "No API token could be found"),
+            Self::IOError => write!(f, "Generic I/O error")
+        }
+    }
+}
+
+impl From<ureq::Error> for Error {
+    fn from(err: ureq::Error) -> Self {
+        match err {
+            ureq::Error::Status(code, _) => Self::RemoteError(code),
+            ureq::Error::Transport(_) => Self::NetworkError
+        }
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(_: std::io::Error) -> Self {
+        Self::IOError
+    }
+}
+
+pub fn retrieve(code: u32) -> Result<Vec<Trip>, Error> {
     let page_text = ureq::get(API_TOKEN_URL)
-        .call().unwrap()
-        .into_string().unwrap();
+        .call()?
+        .into_string()?;
 
     let token_cap = Regex::new(r#"token:"([^"]+)""#)
         .unwrap()
         .captures(&page_text)
-        .unwrap();
+        .ok_or(Error::MissingToken)?;
 
     let token = &token_cap[1];
 
@@ -68,9 +105,9 @@ pub fn retrieve(code: u32) -> Vec<Trip> {
         let path = format!("{}{}", API_BASE_URL, code);
         let response = ureq::get(&path)
             .set("Authorization", &format!("Bearer {}", token))
-            .call().unwrap();
+            .call()?;
 
-        response.into_json().unwrap()
+        response.into_json()?
     };
 
     for mut route in api_res.estimaciones {
@@ -84,5 +121,5 @@ pub fn retrieve(code: u32) -> Vec<Trip> {
     }
 
     res.sort_unstable_by_key(|x: &Trip| x.time);
-    res
+    Ok(res)
 }
