@@ -5,7 +5,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<link rel="stylesheet" href="style.css"/>
 		<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
 
 		<link rel="icon" href="icon.svg" type="image/svg+xml"/>
 		<link rel="apple-touch-icon" href="icon-180.png"/>
@@ -14,9 +17,11 @@
 		<title>SFM++</title>
 	</head>
 	<body>
-		<div id="map" style="height:200px"></div>
+		<div id="map" style="height:500px"></div>
 
-		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"/>
+		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+		<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
 		<script type="module">
 			import { h, Component, render } from 'https://esm.sh/preact';
 			import { useState } from 'https://esm.sh/preact/hooks';
@@ -53,20 +58,20 @@
 			}
 
 			render(html`<${App} />`, document.body);
-		</script>
-
-		<script type="module">
-			import stops from './stops.js';
 
 			const map = L.map('map').setView([39.58, 2.64], 12);
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			}).addTo(map);
 
-			const group = L.layerGroup().addTo(map);
+			const cluster = L.markerClusterGroup().addTo(map);
 
-			for (const [_, stop] of stops)
-				group.addLayer(L.marker([stop.lat, stop.lon]));
+			for (const [code, stop] of stops) {
+				const marker = L.marker([stop.lat, stop.lon])
+					.bindPopup(`${stop.name} (${code.split('/')[0].toUpperCase()})`);
+
+				cluster.addLayer(marker);
+			}
 		</script>
 	</body>
 </html>
