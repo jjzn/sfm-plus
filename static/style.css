@@ -30,6 +30,10 @@ body {
 	table { width: 100%; }
 }
 
+#map {
+	height: 500px;
+}
+
 table { border-collapse: collapse; }
 tr { border: 1px solid currentcolor; }
 :is(td, th) + :is(td, th) { padding-left: 2em; }

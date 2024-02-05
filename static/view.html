@@ -17,14 +17,12 @@
 		<title>SFM++</title>
 	</head>
 	<body>
-		<div id="map" style="height:500px"></div>
-
 		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 		<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 		<script type="module">
 			import { h, Component, render } from 'https://esm.sh/preact';
-			import { useState } from 'https://esm.sh/preact/hooks';
+			import { useState, useRef, useEffect } from 'https://esm.sh/preact/hooks';
 			import htm from 'https://esm.sh/htm';
 			import stops from './stops.js';
 			import Table from './table.js';
@@ -32,6 +30,36 @@
 			const DEFAULT_STOP = 'sfm/1'; // Intermodal station
 
 			const html = htm.bind(h);
+
+			function StopMap() {
+				const mapRef = useRef(null);
+
+				useEffect(() => {
+					const map = L.map(mapRef.current).setView([39.6134, 2.9117], 10);
+					L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+						attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+					}).addTo(map);
+
+					const cluster = L.markerClusterGroup().addTo(map);
+					for (const [code, stop] of stops) {
+						const popup = document.createElement('p');
+						popup.textContent = `${stop.name} (${code.split('/')[0].toUpperCase()})\n`;
+
+						const button = document.createElement('button');
+						button.textContent = 'Seleccionar';
+						button.addEventListener('click', () => alert(code));
+
+						popup.append(button);
+
+						const marker = L.marker([stop.lat, stop.lon])
+							.bindPopup(popup);
+
+						cluster.addLayer(marker);
+					}
+				}, [mapRef]);
+
+				return html`<div ref=${mapRef} id="map"></div>`;
+			}
 
 			function StopSelector({setter}) {
 				const set = event => {
@@ -53,30 +81,12 @@
 
 				return html`
 					<${StopSelector} setter=${setStopCode} />
+					<${StopMap} />
 					<h1>${rev_lookup(stopCode)[1].name}</h1>
 					<${Table} stop=${stopCode} />`;
 			}
 
 			render(html`<${App} />`, document.body);
-
-			const map = L.map('map').setView([39.6134, 2.9117], 10);
-			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-			}).addTo(map);
-
-			const cluster = L.markerClusterGroup().addTo(map);
-
-			for (const [code, stop] of stops) {
-				const popup = `
-					${stop.name} (${code.split('/')[0].toUpperCase()})<br>
-					<button onclick="alert()">Seleccionar</button>
-				`;
-
-				const marker = L.marker([stop.lat, stop.lon])
-					.bindPopup(popup);
-
-				cluster.addLayer(marker);
-			}
 		</script>
 	</body>
 </html>
