@@ -31,7 +31,7 @@
 
 			const html = htm.bind(h);
 
-			function StopMap() {
+			function StopMap({hidden, setter}) {
 				const mapRef = useRef(null);
 
 				useEffect(() => {
@@ -47,7 +47,7 @@
 
 						const button = document.createElement('button');
 						button.textContent = 'Seleccionar';
-						button.addEventListener('click', () => alert(code));
+						button.addEventListener('click', () => setter(code));
 
 						popup.append(button);
 
@@ -58,21 +58,25 @@
 					}
 				}, [mapRef]);
 
-				return html`<div ref=${mapRef} id="map"></div>`;
+				return html`<div ref=${mapRef} class=${hidden ? 'hidden' : ''} id="map"></div>`;
 			}
 
 			function StopSelector({setter}) {
-				const set = event => {
-					const val = event.target.value;
+				const [hidden, setHidden] = useState(true);
+
+				const set = val => {
+					setHidden(true);
 					localStorage.setItem('selected-stop-code', val);
 					setter(val);
 				};
 
 				const initial = localStorage.getItem('selected-stop-code') || DEFAULT_STOP;
-				const rows = stops.map(([k, v]) => html`<option value="${k}" selected=${k == initial}>${v.name}</option>`);
+				//const rows = stops.map(([k, v]) => html`<option value="${k}" selected=${k == initial}>${v.name}</option>`);
+				const [_, current] = stops.find(([k, v]) => k == initial);
 				return html`
 					<label for="stop-select">Aturada</label>
-					<select id="stop-select" onchange=${set}>${rows}</select>`;
+					<button id="stop-select" onclick=${() => setHidden(false)}>${current.name}</button>
+					<${StopMap} hidden=${hidden} setter=${set} />`;
 			}
 
 			function App() {
@@ -81,7 +85,6 @@
 
 				return html`
 					<${StopSelector} setter=${setStopCode} />
-					<${StopMap} />
 					<h1>${rev_lookup(stopCode)[1].name}</h1>
 					<${Table} stop=${stopCode} />`;
 			}
