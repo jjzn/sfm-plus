@@ -26,8 +26,8 @@ impl Fairing for Cors {
 }
 
 #[get("/sfm/<code>")]
-fn info_sfm(code: u8) -> Json<Vec<Trip>> {
-    Json(provider_sfm::retrieve(code))
+async fn info_sfm(code: u8) -> Json<Vec<Trip>> {
+    Json(provider_sfm::retrieve(code).await)
 }
 
 #[get("/emt/<code>")]
@@ -37,10 +37,6 @@ fn info_emt(code: u32) -> Json<Result<Vec<Trip>, provider_emt::Error>> {
 
 #[launch]
 async fn server() -> _ {
-    rocket::tokio::task::spawn_blocking(|| {
-        provider_sfm::listen_socket();
-    });
-
     rocket::build()
         .attach(Cors {})
         .mount("/", routes![info_sfm, info_emt])

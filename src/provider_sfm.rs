@@ -1,24 +1,25 @@
 use crate::types::*;
 
-use rust_socketio::{ClientBuilder, Event, Payload, RawClient};
+use rust_socketio::{client::Client, ClientBuilder, Event, Payload};
 use ureq::json;
-use std::sync::Mutex;
 use std::collections::HashMap;
-use std::sync::LazyLock;
+use std::sync::{LazyLock, Mutex};
+use rocket::tokio::{task, sync::mpsc};
 
+static SOCKETS: LazyLock<Mutex<HashMap<u8, Client>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 static TRIPS: LazyLock<Mutex<HashMap<u8, Vec<Trip>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
-fn panel_callback(payload: Payload, _: RawClient) {
+fn panel_callback(code: u8, payload: Payload) {
     match payload {
         Payload::Text(values) => match values[0]["info"].as_array() {
-            Some(array) => process(1, array),
+            Some(array) => process_socket_response(code, array),
             None => panic!("Expected array")
         },
         _ => panic!("Expected Payload::Text")
     }
 }
 
-fn process(code: u8, trains: &Vec<rocket::serde::json::Value>) {
+fn process_socket_response(code: u8, trains: &Vec<rocket::serde::json::Value>) {
     let mut trips = vec![];
 
     for train in trains {
@@ -37,18 +38,36 @@ fn process(code: u8, trains: &Vec<rocket::serde::json::Value>) {
     map.insert(code, trips);
 }
 
-pub fn listen_socket() {
-    let socket = ClientBuilder::new("https://info.trensfm.com/")
-        .transport_type(rust_socketio::TransportType::Polling)
-        .on("panel", panel_callback)
-        .on(Event::Connect, |_, sock| {
-            let data = vec![json!("panel"), json!({"estacion": 1, "clase": "LCD"}), json!(null)];
+pub fn listen_socket(code: u8, tx: mpsc::Sender<()>) -> Client {
+    ClientBuilder::new("https://info.trensfm.com/")
+        .on("panel", move |payload, _| {
+            panel_callback(code, payload);
+            let _ = tx.clone().try_send(());
+        })
+        .on(Event::Connect, move |_, sock| {
+            let data = vec![json!("panel"), json!({"estacion": code, "clase": "LCD"}), json!(null)];
             sock.emit("tipo", data).unwrap();
         })
         .connect()
-        .unwrap();
+        .unwrap()
 }
 
-pub fn retrieve(code: u8) -> Vec<Trip> {
-    TRIPS.lock().unwrap().get(&1).unwrap().to_vec()
+pub async fn retrieve(code: u8) -> Vec<Trip> {
+    let socket_exists = {
+        let sockets_map = SOCKETS.lock().unwrap();
+        sockets_map.contains_key(&code)
+    };
+
+    if !socket_exists {
+        let (tx, mut rx) = mpsc::channel(1); // TODO
+
+        task::spawn_blocking(move || {
+            let socket = listen_socket(code, tx);
+            SOCKETS.lock().unwrap().insert(code, socket);
+        });
+
+        rx.recv().await; // Wait until we have received data at least once
+    }
+
+    TRIPS.lock().unwrap().get(&code).unwrap().to_vec()
 }
