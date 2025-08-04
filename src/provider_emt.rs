@@ -1,6 +1,6 @@
-use rocket::serde::{Serialize, Deserialize};
-use chrono::{Duration, prelude::Local};
+use chrono::{prelude::Local, Duration};
 use regex::Regex;
+use rocket::serde::{Deserialize, Serialize};
 
 use crate::types::*;
 
@@ -15,7 +15,7 @@ struct EmtApiItem {
     llegando: bool,
 
     #[serde(skip)]
-    line: String
+    line: String,
 }
 
 impl From<EmtApiItem> for Trip {
@@ -31,7 +31,7 @@ impl From<EmtApiItem> for Trip {
             headsign: val.destino,
             time: time.into(),
             track: None,
-            line: Some(val.line)
+            line: Some(val.line),
         }
     }
 }
@@ -41,13 +41,13 @@ impl From<EmtApiItem> for Trip {
 struct EmtApiRoute {
     line: String,
     vh_first: EmtApiItem,
-    vh_second: Option<EmtApiItem>
+    vh_second: Option<EmtApiItem>,
 }
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 struct EmtApiResponse {
-    estimaciones: Vec<EmtApiRoute>
+    estimaciones: Vec<EmtApiRoute>,
 }
 
 #[derive(Debug, Serialize)]
@@ -56,7 +56,7 @@ pub enum Error {
     RemoteError(u16),
     NetworkError,
     MissingToken,
-    IOError
+    IOError,
 }
 
 impl std::error::Error for Error {}
@@ -67,7 +67,7 @@ impl std::fmt::Display for Error {
             Self::RemoteError(code) => write!(f, "Remote server error, status code {}", code),
             Self::NetworkError => write!(f, "Network error"),
             Self::MissingToken => write!(f, "No API token could be found"),
-            Self::IOError => write!(f, "Generic I/O error")
+            Self::IOError => write!(f, "Generic I/O error"),
         }
     }
 }
@@ -76,7 +76,7 @@ impl From<ureq::Error> for Error {
     fn from(err: ureq::Error) -> Self {
         match err {
             ureq::Error::Status(code, _) => Self::RemoteError(code),
-            ureq::Error::Transport(_) => Self::NetworkError
+            ureq::Error::Transport(_) => Self::NetworkError,
         }
     }
 }
@@ -88,9 +88,7 @@ impl From<std::io::Error> for Error {
 }
 
 pub fn retrieve(code: u32) -> Result<Vec<Trip>, Error> {
-    let page_text = ureq::get(API_TOKEN_URL)
-        .call()?
-        .into_string()?;
+    let page_text = ureq::get(API_TOKEN_URL).call()?.into_string()?;
 
     let token_cap = Regex::new(r#"token:"([^"]+)""#)
         .unwrap()
