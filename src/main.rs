@@ -37,6 +37,10 @@ fn info_emt(code: u32) -> Json<Result<Vec<Trip>, provider_emt::Error>> {
 
 #[launch]
 async fn server() -> _ {
+    rocket::tokio::task::spawn_blocking(|| {
+        provider_sfm::listen_socket();
+    });
+
     rocket::build()
         .attach(Cors {})
         .mount("/", routes![info_sfm, info_emt])

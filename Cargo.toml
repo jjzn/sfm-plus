@@ -5,14 +5,12 @@ edition = "2021"
 
 [dependencies]
 rocket = { version = "0.5.0-rc.3", features = ["json"] }
-rusty-tesseract = "1.1.7"
 ureq = { version = "2.7.1", features = ["json"] }
-image = "0.24.7"
-opencv = { version = "0.84.5", default-features = false, features = ["imgproc"] }
 regex = "1.9.5"
 phf = { version = "0.11.2", features = ["macros"] }
 chrono = "0.4.29"
 rayon = "1.7.0"
+rust_socketio = "0.6.0"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
