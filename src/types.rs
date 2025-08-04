@@ -53,7 +53,7 @@ impl From<NaiveTime> for TripTime {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Trip {
     pub headsign: String,

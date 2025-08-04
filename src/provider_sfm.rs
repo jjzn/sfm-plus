@@ -2,20 +2,23 @@ use crate::types::*;
 
 use rust_socketio::{ClientBuilder, Event, Payload, RawClient};
 use ureq::json;
+use std::sync::Mutex;
+use std::collections::HashMap;
+use std::sync::LazyLock;
 
-
+static TRIPS: LazyLock<Mutex<HashMap<u8, Vec<Trip>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 fn panel_callback(payload: Payload, _: RawClient) {
     match payload {
         Payload::Text(values) => match values[0]["info"].as_array() {
-            Some(array) => println!("{:?}", process(array)),
+            Some(array) => process(1, array),
             None => panic!("Expected array")
         },
         _ => panic!("Expected Payload::Text")
     }
 }
 
-fn process(trains: &Vec<rocket::serde::json::Value>) -> Vec<Trip> {
+fn process(code: u8, trains: &Vec<rocket::serde::json::Value>) {
     let mut trips = vec![];
 
     for train in trains {
@@ -30,7 +33,8 @@ fn process(trains: &Vec<rocket::serde::json::Value>) -> Vec<Trip> {
         trips.push(Trip { headsign, time, track, line });
     }
 
-    trips
+    let mut map = TRIPS.lock().unwrap();
+    map.insert(code, trips);
 }
 
 pub fn listen_socket() {
@@ -46,5 +50,5 @@ pub fn listen_socket() {
 }
 
 pub fn retrieve(code: u8) -> Vec<Trip> {
-    return vec![];
+    TRIPS.lock().unwrap().get(&1).unwrap().to_vec()
 }
