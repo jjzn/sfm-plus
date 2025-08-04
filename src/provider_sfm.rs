@@ -1,13 +1,50 @@
 use crate::types::*;
 
 use rust_socketio::{client::Client, ClientBuilder, Event, Payload};
-use ureq::json;
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex};
 use rocket::tokio::{task, sync::mpsc};
+use rocket::serde::{Deserialize, json::serde_json::{json, self}};
+use chrono::TimeZone;
+use chrono_tz::Europe::Madrid; // SFM uses their local time zone
+
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct SFMLinesStations {
+    #[serde(rename = "linea")]
+    lines: Vec<SFMLine>,
+
+    #[serde(rename = "ubicacion")]
+    stations: Vec<SFMStation>
+}
+
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct SFMLine {
+    #[serde(rename = "cod_linea")]
+    code: i64,
+
+    #[serde(rename = "simbolo")]
+    name: String
+}
+
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct SFMStation {
+    #[serde(rename = "cod_ubicacion")]
+    code: i64,
+
+    #[serde(rename = "descripcion")]
+    name: String
+}
 
 static SOCKETS: LazyLock<Mutex<HashMap<u8, Client>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 static TRIPS: LazyLock<Mutex<HashMap<u8, Vec<Trip>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+
+static LINES_STATIONS: LazyLock<SFMLinesStations> = LazyLock::new(|| {
+    let raw = include_str!("../sfm_lines_stations.json");
+    serde_json::from_str(raw).unwrap()
+});
 
 fn panel_callback(code: u8, payload: Payload) {
     match payload {
@@ -19,17 +56,32 @@ fn panel_callback(code: u8, payload: Payload) {
     }
 }
 
-fn process_socket_response(code: u8, trains: &Vec<rocket::serde::json::Value>) {
+// TODO process the remarks field
+fn process_socket_response(code: u8, trains: &Vec<serde_json::Value>) {
     let mut trips = vec![];
 
     for train in trains {
-        let headsign = train["cod_destino"].as_i64().unwrap().to_string();
+        let destination_code = train["cod_destino"].as_i64().unwrap();
+        let headsign = LINES_STATIONS.stations
+            .iter()
+            .find(|station| station.code == destination_code)
+            .unwrap()
+            .name
+            .to_string();
 
         let millis = train["hora"].as_i64().unwrap();
-        let time = chrono::DateTime::from_timestamp_millis(millis).unwrap().time().into();
+        let time = Madrid.timestamp_millis_opt(millis).unwrap().time().into();
 
         let track = train["via"].as_i64().map(|x| x as u8);
-        let line = train["linea"].as_i64().map(|x| x.to_string());
+
+        let line_code = train["linea"].as_i64();
+        let line = match line_code {
+            Some(code) => LINES_STATIONS.lines
+                .iter()
+                .find(|line| line.code == code)
+                .map(|line| line.name.to_string()),
+            None => None
+        };
 
         trips.push(Trip { headsign, time, track, line });
     }
