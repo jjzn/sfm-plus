@@ -3,7 +3,7 @@ use crate::types::*;
 use rust_socketio::{client::Client, ClientBuilder, Event, Payload};
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex};
-use rocket::tokio::{task, sync::mpsc};
+use rocket::tokio::sync::mpsc;
 use rocket::serde::{Deserialize, json::serde_json::{json, self}};
 use chrono::TimeZone;
 use chrono_tz::Europe::Madrid; // SFM uses their local time zone
@@ -113,7 +113,7 @@ pub async fn retrieve(code: u8) -> Vec<Trip> {
     if !socket_exists {
         let (tx, mut rx) = mpsc::channel(1); // TODO
 
-        task::spawn_blocking(move || {
+        std::thread::spawn(move || {
             let socket = listen_socket(code, tx);
             SOCKETS.lock().unwrap().insert(code, socket);
         });
